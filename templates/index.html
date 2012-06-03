@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{%- block content %}
+  <hgroup class="pagehead">
+    <h1>{{ page.title }}</h1>
+    {%- if page.subtitle %}
+      <h2>{{ page.subtitle }}</h2>
+    {%- endif %}
+  </hgroup>
+  {{ page.content }}
+
+  {% for subpage in page.subpages %}
+    <div class="post">
+      <hgroup class="post">
+        <h2>{{ subpage.title }}</h2>
+        <span class="date">{{ subpage.date }}</span>
+        {% for tag in subpage.tags %}
+          <span class="tag">{{tag}}</span>
+        {% endfor %}
+      </hgroup>
+      {{ subpage.preview }}
+      <a href="{{ subpage.url }}">Read more...</a>
+    </div>
+  {% endfor %}
+{%- endblock %}
