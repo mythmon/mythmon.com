@@ -24,7 +24,7 @@
     <header>
       <h1><a href="/">{{ site.title }}</a></h1>
       <nav>
-        {%- for nav in site.tags['_nav']|sort(attribute='nav_sort') %}
+        {%- for nav in site.tags['_nav']|sort(attribute='nav_weight') %}
           {%- if nav.url == page.url %}
             <a href="{{ nav.url }}" class="active">{{ nav.title }}</a>
           {%- else %}

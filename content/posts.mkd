@@ -1,4 +1,5 @@
-title: All Posts
-slug: posts
+title: Posts
+tags: [_nav]
+nav_weight: 1
 type: index
 ---

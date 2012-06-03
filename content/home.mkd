@@ -1,6 +1,8 @@
 title: Home
 type: home
 url: /index.html
+tags: [_nav]
+nav_weight: 0
 ---
 hello
 -----
@@ -8,6 +10,10 @@ My name is Mike Cooper. I am a developer, systems adminstrator, and hacker from
 Corvallis, OR. I am in my senior year of the Computer Science program at
 [Oregon State University][osu]. I also go by `mythmon` in various online
 settings, including [freenode][].
+
+[osu]: http://oregonstate.edu
+[freenode]: http://freenode.net
+---
 
 work
 ----
@@ -32,8 +38,6 @@ and learning about different music. I don't think that sharing music is a
 crime, and I think that the current music industry needs a bit of help to come
 into the information age.
 
-[osu]: http://oregonstate.edu
-[freenode]: http://freenode.net
 [osl]: http://osuosl.org
 [asf]: http://apache.org
 [drupal]: http://drupal.org
