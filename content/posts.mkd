@@ -2,4 +2,5 @@ title: Posts
 tags: [_nav]
 nav_weight: 1
 type: index
+url: /index.html
 ---

@@ -1,11 +1,25 @@
 {% extends "base.html" %}
 
 {%- block content %}
-  <hgroup class="pagehead">
+  <header>
     <h1>{{ page.title }}</h1>
-    {%- if page.subtitle %}
+    {% if page.subtitle %}
       <h2>{{ page.subtitle }}</h2>
-    {%- endif %}
-  </hgroup>
+    {% endif %}
+
+    <div class="subheader">
+      Posted on
+      <span class="date">{{ page.date }}</span>
+
+      in
+
+      <ul class="tags">
+        {%- for tag in page.tags %}
+          {% if loop.last %} and {% endif %}
+          <li class="tag">{{tag}}</li>{% if not loop.last %},{% endif %}
+        {%- endfor %}</ul>.
+    </div>
+  </header>
+
   {{ page.content }}
 {%- endblock %}
