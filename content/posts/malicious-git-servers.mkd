@@ -15,7 +15,7 @@ The malicious git
 -----------------
 So I did an experiment. I created a repository in `~/tmp/malice/a`. I checked in two files `good.txt` and `evil.txt`. I put the words "good" and "evil" in them, respectively. I commited, and it was good. For a sanity check, I cloned that repository to `~/tmp/malice/b`. Everything looked as I expected. I deleted the clone, and started fiddling with git's internals.
 
-So I did an experiment. I created a repository in `~/tmp/malice/a`. I checked in a files `good.txt`.txt`, and put word "good" in it. I commited, and it was good. For a sanity check, I cloned that repository to `~/tmp/malice/b`. Everything looked as I expected. I deleted the clone, and started fiddling with git's internals.
+So I did an experiment. I created a repository in `~/tmp/malice/a`. I checked in a files `good.txt`, and put word "good" in it. I commited, and it was good. For a sanity check, I cloned that repository to `~/tmp/malice/b`. Everything looked as I expected. I deleted the clone, and started fiddling with git's internals.
 
 My first thought was to modify the object file that represented the tree, to try and replace the file with another one. Unfortunately, git's objects files aren't packed in a human readable way, so this didn't work out. After some more thought, I decided I could just modify the object file representing `good.txt` directly. Surely those are stored in a human readable way.
 
@@ -39,13 +39,12 @@ A small comfort
 ---------------
 Someone pointed that the various remote protocols git used would probably be a little pickier about what it got, in case of network transmission errors. Luckily, this was true. I tested http, git, and ssh protocols, and each of them raised an error on clone:
 
-```git-clone
-Cloning into './c'...
-error: File 12799ccbe7ce445b11b7bd4833bcc2c2ce1b48b7 has bad hash
-fatal: missing blob object '12799ccbe7ce445b11b7bd4833bcc2c2ce1b48b7'
-fatal: remote did not send all necessary objects
-Unexpected end of command stream
-```
+    ::text
+    Cloning into './c'...
+    error: File 12799ccbe7ce445b11b7bd4833bcc2c2ce1b48b7 has bad hash
+    fatal: missing blob object '12799ccbe7ce445b11b7bd4833bcc2c2ce1b48b7'
+    fatal: remote did not send all necessary objects
+    Unexpected end of command stream
 
 The particular output varied a little with each protocol, but the result was the same. An error in the output, return code 128, and no repository cloned. This is good.
 

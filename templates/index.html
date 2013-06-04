@@ -1,13 +1,18 @@
 {% extends "base.html" %}
 
 {%- block content %}
-  <header class="pagehead">
-    <h1>{{ page.title }}</h1>
-    {%- if page.subtitle %}
-      <h2>{{ page.subtitle }}</h2>
-    {%- endif %}
-  </header>
-  {{ page.content }}
+  {% if page.content %}
+    <header class="pagehead">
+      <h1>{{ page.title }}</h1>
+      {%- if page.subtitle %}
+        <h2>{{ page.subtitle }}</h2>
+      {%- endif %}
+    </header>
+
+    {{ page.content }}
+
+    <hr>
+  {% endif %}
 
   {% for subpage in page.subpages|sort(reverse=True, attribute='date') %}
     <div class="post">
@@ -28,6 +33,10 @@
       </header>
 
       {{ subpage.content }}
+
+      {% if not loop.last %}
+        <hr>
+      {% endif %}
     </div>
   {% endfor %}
 {%- endblock %}
