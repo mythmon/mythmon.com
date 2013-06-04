@@ -9,7 +9,7 @@
   </header>
   {{ page.content }}
 
-  {% for subpage in page.subpages %}
+  {% for subpage in page.subpages|sort(reverse=True, attribute='date') %}
     <div class="post">
       <header>
         <h2><a href="{{ subpage.url }}">{{ subpage.title }}</a></h2>
