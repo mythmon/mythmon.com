@@ -187,8 +187,8 @@ and the search "como borrar las cookies":
     ::json
     [
         {"token": "como", "start": 0, "end": 4},
-        {"token": "borrar", "start": 6, "end": 11}
-        {"token": "las", "start": 12, "end": 15}
+        {"token": "borrar", "start": 6, "end": 11},
+        {"token": "las", "start": 12, "end": 15},
         {"token": "cooki", "start": 16 "end": 23}
     ]
 
@@ -223,7 +223,7 @@ The new query includes an analyzer field on the text match:
         "query": {
             "text": {
                 "document_title": {
-                    "query": "como borrar las cookies"
+                    "query": "como borrar las cookies",
                     "analyzer": "snowball-spanish"
                 }
             }
