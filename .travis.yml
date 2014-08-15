@@ -1,10 +1,10 @@
 language: python
 python:
-  - '2.7'
+- '2.7'
 script:
-  - fab build
+- fab build
 after_success:
-  - fab publish
+- fab publish
 env:
   global:
-    secure: HyeB+MlDkIr1sB/m5ry7gr4lkwIJJl043rCx9jZ6KX3L71dsY06TqY3dDbvTVr5qA2nBRgzZ3MU/ORjMQj7H5PjkGOp6D5teGu2pZvlQSB3bv9LhatPggAcxd7Vn9C3XHZDB7jAOHp+6Q7mUxtIlerynayH+MB6tgtDGbPkaOEk=
+    secure: YY5yrNso7QMkSejLoMttuyGMbbNQgNeLi5alOzGCfHHzNl3co5BNvWBirBRHKeXbwrl0Bk+gFY980P7HhheQjVrW+S4mjTA2a97FAz5bT+zDHROrbUnrdMhujKQdfuSiwJ6f57ZiRuEl449YuPgocc5SBYvSaM4TWpmD8TixGn8=

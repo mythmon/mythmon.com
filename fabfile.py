@@ -55,4 +55,4 @@ def publish():
         with hide('running'):
             cmd = 'git push https://{}@{} gh-pages:gh-pages'
             print cmd.format('********', GH_REF)
-            local('echo ' + cmd.format(GH_TOKEN, GH_REF))
+            local(cmd.format(GH_TOKEN, GH_REF))
