@@ -3,7 +3,7 @@ python:
   - '2.7'
 script:
   - fab build
-  - fab deploy
+  - fab publish
 env:
   global:
     secure: HyeB+MlDkIr1sB/m5ry7gr4lkwIJJl043rCx9jZ6KX3L71dsY06TqY3dDbvTVr5qA2nBRgzZ3MU/ORjMQj7H5PjkGOp6D5teGu2pZvlQSB3bv9LhatPggAcxd7Vn9C3XHZDB7jAOHp+6Q7mUxtIlerynayH+MB6tgtDGbPkaOEk=
