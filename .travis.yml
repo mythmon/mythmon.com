@@ -3,6 +3,7 @@ python:
   - '2.7'
 script:
   - fab build
+after_success:
   - fab publish
 env:
   global:
