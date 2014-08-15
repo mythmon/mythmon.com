@@ -52,7 +52,7 @@ def publish():
         local('git commit -am "Travis Build"')
 
         # Hide commands, since there will be secrets.
-        with hide('running'):
-            cmd = 'git push https://{}@{} gh-pages:gh-pages'
-            print cmd.format('********', GH_REF)
+        cmd = 'git push https://{}@{} gh-pages:gh-pages'
+        print cmd.format('********', GH_REF)
+        with hide('running', 'stdout', 'stderr'):
             local(cmd.format(GH_TOKEN, GH_REF))
