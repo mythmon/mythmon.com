@@ -46,10 +46,10 @@ def publish():
     build()
 
     with cd('output'):
-        local('git add .')
-        author = 'Travis Build <travis@mythmon.com>'
-        message = 'Travis Build'
-        local('git commit --author "{}" -am "{}"'.format(author, message))
+        local('git add --all .')
+        local('git config user.email "travis@mythmon.com"')
+        local('git config user.name "Travis Build"')
+        local('git commit -am "Travis Build"')
 
         # Hide commands, since there will be secrets.
         with hide('running'):
