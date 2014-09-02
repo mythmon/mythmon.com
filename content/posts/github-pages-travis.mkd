@@ -215,6 +215,9 @@ So that Travis knows what tools it needs, I added a `requirements.txt` file to
 my repository, which Travis understands how to use, if you set the language to
 Python. Then I added a `.travis.yml` to tell Travis how to build my site.
 
+> I wrapped the secure token here. And yes, it is fine. It is encrypted, as
+> I'll explain below.
+
 ```yaml
 language: python
 python:
@@ -225,7 +228,9 @@ after_success:
 - invoke publish
 env:
   global:
-    secure: LXYt0XENsCV58GD2g2jB27Hil9O80DXdnyM6palKLNcYa7z/hqvqtkCwW9Wmj5jqLXjUjiTAk0BUqinvL6ZPrqGiluWQ5hY2e9YNG/eYRd1Qv1TdaDu2+iCfIK8VDehGZl9G8Ly09RL6gfHWxofnSamMztcFWqDbh/2iDp3GmUU=
+    secure: LXYt0XENsCV58GD2g2jB27Hil9O80DXdnyM6palKLNcYa7z/hqvqtkCwW9Wmj5jqLXj
+            UjiTAk0BUqinvL6ZPrqGiluWQ5hY2e9YNG/eYRd1Qv1TdaDu2+iCfIK8VDehGZl9G8L
+            y09RL6gfHWxofnSamMztcFWqDbh/2iDp3GmUU=
 ```
 
 Basic simple stuff. Since the  The script command (`invoke build`) builds the
