@@ -1,0 +1,341 @@
+title: Github Pages, Travis, and Static Sites
+date: 2014-09-01
+category: posts
+tags: [github, travis, static, meta]
+
+---
+
+I recently switched my blog to being hosted on [GitHub Pages][ghpages] instead
+of hosting the static site myself. Along with this change, I was able to
+automate the rendering and updating of the site, thanks to GitHub webhooks, and
+[Travis-CI][travis]. As always, I'm using [wok][] for the rendering and
+management of the site.
+
+My work flow now looks like this:
+
+1. Write a post, edit something, change a template, etc.
+2. git commit.
+3. git push.
+4. Wait for the robots to do my bidding.
+
+It is ideal.
+
+[ghpages]: https://pages.github.com/
+[travis]: https://travis-ci.org/
+[wok]: http://wok.mythmon.com/
+
+
+# Prerequisites
+
+For this to work, there are a few things that are needed.  First, and most
+fundamental, the site needs to be fully static. A pile of HTML, CSS, JS,
+images, etc. Nothing server side at all. Otherwise it can't be hosted on GitHub
+Pages.
+
+Next, the site has to be stored on GitHub, and it **can't be the account's main
+GHPage repository**. For example, I cannot use the repository
+`mythmon/mythmon.github.io`. This is because GHPages treats the branches in
+that repository differently. It should be possible to set up this this work
+flow on a repository like this, but I won't go into it here.
+
+The `master` branch will be where the source of the site is, the parts a human
+edits. The `gh-pages` branch will hold the rendered output, and be generated
+automatically.
+
+Finally, the site needs to be easy to render on Travis. This usually means that
+all the tools are easy to install with pip or npm or another package manager,
+and the process of rendering the output from a checkout of the site can be
+scripted. Any wok sites should fit these requirements.
+
+
+# Part 1 - Automation.
+
+Before I can ask the robots to do my bidding, I have to automate the process
+they are going to be doing. Two commands are needed, one to build the site, and
+one to commit the new version and push it to GitHub.
+
+My site uses wok, which is a Python library. Because of this, I wanted a
+Python task runner to automate the build process. It may have been overkill,
+but I used [Invoke][]. Here is my invoke script, `task.py`, with explanation
+interspersed.
+
+If you're unfamiliar with Invoke, it is gives a nice way to define tasks, run
+shell commands, and run Python code. Make, shell scripts, Gulp, or any other
+task runner would work just as well.
+
+Here's the code. First, some imports.
+
+```python
+import os
+from contextlib import contextmanager
+from datetime import datetime
+
+from invoke import task, run
+
+```
+
+These two constants are used to clone and push the repository. `GH_REF` is the
+repository's remote URL, without any protocol, and `GH_TOKEN` will be a GitHub
+authorization token from the environment. More on this in a bit.
+
+```python
+GH_REF = 'github.com/mythmon/mythmon.com.git'
+GH_TOKEN = os.environ.get('GH_TOKEN')
+```
+
+This is a simple context manager that lets me change into a directory, run some
+commands, then safely change out of it. I'm likely reinventing the wheel here.
+
+```python
+@contextmanager
+def cd(newdir):
+    print 'Entering {}/'.format(newdir)
+    prevdir = os.getcwd()
+    os.chdir(newdir)
+    try:
+        yield
+    finally:
+        print 'Leaving {}/'.format(newdir)
+        os.chdir(prevdir)
+```
+
+Here is the first of the three tasks defined. This one makes sure that the
+output directory is in the right state. It should work even if the directory
+already exists, if it wasn't a git repo, if it has stray file lying around,
+or even if it is on the wrong commit or branch. This is generally useful outside
+of Travis as well.
+
+```python
+def make_output():
+    if os.path.isdir('output/.git'):
+        with cd('output'):
+            run('git reset --hard')
+            run('git clean -fxd')
+            run('git checkout gh-pages')
+            run('git fetch origin')
+            run('git reset --hard origin/gh-pages')
+    else:
+        run('rm -rf output')
+        run('git clone https://{} output'.format(GH_REF))
+```
+
+This next task simply renders the site. It sets up the output directory by
+calling the above task, and then calls then trigger wok, the site renderer.
+Nice and simple
+
+```python
+@task(default=True)
+def build():
+    make_output()
+    run('wok')
+```
+
+This last task is the bit that actually publishes to GitHub in a safe,
+secure, and automated way.
+
+```python
+@task
+def publish():
+    if not GH_TOKEN:
+        raise Exception("Probably can't push because GH_TOKEN is blank.")
+    build()
+
+    with cd('output'):
+```
+
+The first thing it does is configure a user for git. GitHub won't accept pushes
+without user information, so I put some fake information here.
+
+```python
+        run('git config user.email "travis@mythmon.com"')
+        run('git config user.name "Travis Build"')
+```
+
+Next it `git add`s ll the files in the output directory. The `--all` fag
+will deal with new files being added, old files being changed, and old files
+being deleted. It won't commit anything in the .gitignore, if you have one.
+
+```python
+        run('git add --all .')
+```
+
+Now, make the commit. I thought for a while about what to put in the git commit
+message. At first I was going to put a timestamp, but I realized that git will
+do that for me already. Future improvements might note what commits this version
+of the site was built from.
+
+```python
+        run('git commit -am "Travis Build"')
+```
+
+Finally, the script needs to push the resulting commit up to the gh-pages branch
+of GitHub, so it will be served. The first problem I faced was how to
+authenticate with GitHub to do this. The second was how to do that without
+revealing any secrets.
+
+The solution to the first problem was [GitHub token auth][tokens]. By using the
+HTTPS protocol, and putting the token in the authentication section of the URL,
+I can push to any GitHub repo that token has access to.
+
+The problem with this is that git prints out the remote when you push. Since my
+token is in the URL, which is the remote name in this case, it was printing
+secrets out in Travis logs! The solution is to hide git's output. It seems
+obvious in retrospect, but I revealed two tokens this way in Travis logs
+(they were immediately revoked, of course).
+
+```python
+        # Hide output, since there will be secrets.
+        cmd = 'git push https://{}@{} gh-pages:gh-pages'
+        run(cmd.format(GH_TOKEN, GH_REF), hide='both')
+```
+
+To run these tasks, I use `invoke build` and `invoke publish`, to build and
+publish the site, respectively.
+
+[invoke]: http://invoke.readthedocs.org/en/latest/
+[tasks.py]: https://github.com/mythmon/mythmon.com/blob/master/tasks.py
+[tokens]: https://github.com/blog/1509-personal-api-tokens
+
+
+# Part 2 - Travis
+
+As you can tell, the bulk of the work is in the automation. A lot of thought
+went into the 60 or so lines of code above. Now that it is automated, it is easy
+to make the robots do the rest. I chose Travis for my automation.
+
+I went to the Travis site, set up the repository for the site, and tweaked a few
+settings. In particular, I turned off the "Build pushes" option, because it
+isn't useful to me. There isn't any risk of revealing secrets in PRs, because
+Travis doesn't decrypt the secrets in PR builds. The other setting I tweaked
+is to turn on "Buildon if .travis.yml is present". Since I was doing all this
+work on a branch, I didn't want my master branch to be making builds happen, and
+I think this is a generally good setting to set on Travis.
+
+So that Travis knows what tools it needs, I added a `requirements.txt` file to
+my repository, which Travis understands how to use, if you set the language to
+Python. Then I added a `.travis.yml` to tell Travis how to build my site.
+
+```yaml
+language: python
+python:
+- '2.7'
+script:
+- invoke build
+after_success:
+- invoke publish
+env:
+  global:
+    secure: LXYt0XENsCV58GD2g2jB27Hil9O80DXdnyM6palKLNcYa7z/hqvqtkCwW9Wmj5jqLXjUjiTAk0BUqinvL6ZPrqGiluWQ5hY2e9YNG/eYRd1Qv1TdaDu2+iCfIK8VDehGZl9G8Ly09RL6gfHWxofnSamMztcFWqDbh/2iDp3GmUU=
+```
+
+Basic simple stuff. Since the  The script command (`invoke build`) builds the
+site, using the big script above. Similarly, the after success command `invoke
+publish` uploads the site to GitHub (but only if the site actually builds).
+
+Woah, hold on. What's all this junk at the end? That "junk" is the magic to
+safely pass secrets to Travis builds in a public repository. It is a line that
+looks like `GH_TOKEN=abcdef1234567890`, encrypted using a public key for which
+Travis holds the private key. In "safe" builds (builds on my repo that are
+not from PRs) Travis will decrypt that token and provide it to the build.
+The invoke script then picks up the environment variable and uses it when it
+pushes to GitHub. Pretty slick.
+
+To generate this encrypted line, I used the [Travis CLI tool][traviscli] like
+this:
+
+```bash
+$ travis encrypt --add
+Reading from stdin, press Ctrl+D when done
+GH_TOKEN=abcdef123457890
+^D
+```
+
+That is, I ran the command, typed the name of the environement variable,
+followed by an equals sign, and then the value, then I pressed enter, and then
+Ctrl+D.  This is a normal interactive read from stdin. After doing that, my
+`.travis.yml` file contained the encrypted string, and I was ready to commit
+it.
+
+I got the value for that environment variable from
+[GitHub's personal API token generator][tokens].
+
+
+# Part 3 - DNS
+
+I could be done now. At this point, when I push a new version of my site to
+GitHub, it fires a webhook, Travis builds my site, pushes it back to GitHub,
+and then GitHub serves it with GitHub Pages.
+
+This didn't work for me for a couple reasons. First, I like my URL, and didn't
+really want to change. Second, my site assumes it as at the root of the server,
+and can't deal with GitHub's insistence of putting this site at
+`mythmon.github.io/mythmon.com`.  The content of this site is there, but it's
+all unstyled, because of broken links to the CSS, and none of the links work.
+Maybe someday I'll fix this.
+
+So I have to do some DNS tricks and tell GH pages to expect another domain name
+for my site.
+
+## Telling GitHub.
+
+So that GitHub knows what site to serve when someone visits www.mythmon.com, I
+had to add a `CNAME` file to the `gh-pages` branch of the site. Luckily with
+wok that was pretty easy. I made the file `media/CNAME` which wok put in the
+root of the `gh-pages` branch and gave it the contents `www.mythmon.com`. It
+takes some minutes for GitHub to recognize this change, but after that it works
+well.
+
+## Setting up DNS
+
+You may have noticed that I say www.mythmon.com` there, instead of the nice
+clean `mythmon.com`. I would prefer the latter, but it isn't to be with
+GHPages.
+
+The recommended way to use custom DNS with GHPages is to make whatever domain
+name that should serve the site use a CNAME to `username.github.io`. So for me,
+I have `www.mythmon.com  IN  CNAME  mythmon.github.io` in a Bind config.  The
+problem is, according to [RFC 1912][1912], "A CNAME record is not allowed to
+coexist with any other data." Since the root of a domain has to have some other
+records (NS, SOA, possible MX or TXT), you can't have a CNAME to GitHub at the
+root. `:(`.
+
+## Redirects
+
+The problem with *this* is that I have used `http://mythmon.com` to reference my
+blog in the past, and [cool URIs don't change][cooluris]. So I needed to find a
+way to make the old adadress work.
+
+First I tried making `mythmon.com` have an A record to the IPs of the GHPages
+servers.  This [isn't recommended][arecords], but it does work if that is the
+primary DNS name of the site. However, since in the CNAME *file* above, I wrote
+down `www.mythmon.com` (with the recommended DNS CNAME setup), this didn't
+work. It gave "No such domain" errors. Bummer.
+
+The solution I ended up going with is less nice. I pointed the root record at
+the server I used to host the site on, which is still running nginx. I put this
+in my Nginx config:
+
+```nginx
+server {
+    listen       80;
+    server_name  mythmon.com;
+    return 301 $scheme://www.mythmon.com$request_uri;
+}
+```
+
+This causes Nginx to serve permanent redirects to the correct url, preserving
+any path information. Not the best experience, but it works.
+
+[1912]: https://www.ietf.org/rfc/rfc1912.txt
+[cooluris]: http://www.w3.org/Provider/Style/URI.html
+[arecords]: https://help.github.com/articles/about-custom-domains-for-github-pages-sites
+
+# That's it.
+
+Now the site works. It gets served from a fast CDN, I don't have to worry about
+re-rendering the site, and I get to make blog posts with git. The robots do the
+tedious work for me. It is ideal.
+
+If you have any comments or questions, I'm [@mythmon on Twitter][twitter].
+
+[twitter]: http://twitter.com/mythmon
