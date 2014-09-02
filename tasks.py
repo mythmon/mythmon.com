@@ -2,8 +2,7 @@ import os
 from contextlib import contextmanager
 from datetime import datetime
 
-from fabric.api import local
-from fabric.context_managers import hide
+from invoke import task, run
 
 
 GH_REF = 'github.com/mythmon/mythmon.com.git'
@@ -25,34 +24,35 @@ def cd(newdir):
 def make_output():
     if os.path.isdir('output/.git'):
         with cd('output'):
-            local('git reset --hard')
-            local('git clean -fxd')
-            local('git checkout gh-pages')
-            local('git fetch origin')
-            local('git reset --hard origin/gh-pages')
+            run('git reset --hard')
+            run('git clean -fxd')
+            run('git checkout gh-pages')
+            run('git fetch origin')
+            run('git reset --hard origin/gh-pages')
     else:
-        local('rm -rf output')
-        local('git clone https://{} output'.format(GH_REF))
+        run('rm -rf output')
+        run('git clone https://{} output'.format(GH_REF))
 
 
+@task(default=True)
 def build():
     make_output()
-    local('wok')
+    run('wok')
 
 
+@task
 def publish():
     if not GH_TOKEN:
         raise Exception("Probably can't push because GH_TOKEN is blank.")
     build()
 
     with cd('output'):
-        local('git add --all .')
-        local('git config user.email "travis@mythmon.com"')
-        local('git config user.name "Travis Build"')
-        local('git commit -am "Travis Build"')
+        run('git add --all .')
+        run('git config user.email "travis@mythmon.com"')
+        run('git config user.name "Travis Build"')
+        run('git commit -am "Travis Build"')
 
         # Hide commands, since there will be secrets.
         cmd = 'git push https://{}@{} gh-pages:gh-pages'
         print cmd.format('********', GH_REF)
-        with hide('running', 'stdout', 'stderr'):
-            local(cmd.format(GH_TOKEN, GH_REF))
+        run(cmd.format(GH_TOKEN, GH_REF), hide='both')
