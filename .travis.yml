@@ -2,9 +2,9 @@ language: python
 python:
 - '2.7'
 script:
-- fab build
+- invoke build
 after_success:
-- fab publish
+- invoke publish
 env:
   global:
     secure: LXYt0XENsCV58GD2g2jB27Hil9O80DXdnyM6palKLNcYa7z/hqvqtkCwW9Wmj5jqLXjUjiTAk0BUqinvL6ZPrqGiluWQ5hY2e9YNG/eYRd1Qv1TdaDu2+iCfIK8VDehGZl9G8Ly09RL6gfHWxofnSamMztcFWqDbh/2iDp3GmUU=
