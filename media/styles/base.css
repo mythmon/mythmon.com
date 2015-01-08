@@ -101,6 +101,18 @@ pre {
   color: #555;
   background-color: #F0F0F0; }
 
+.codepath {
+  border-left: 3px solid rgb(221, 221, 221);
+  color: rgb(85, 85, 85);
+  font-family: mono;
+  font-weight: bold;
+  display: block;
+  border-bottom: 0px solid rgb(221, 221, 221);
+  background: none repeat scroll 0% 0% rgb(240, 240, 240);
+  margin-bottom: -20px;
+  padding: 5px 0 5px 10px;
+}
+
 .highlighttable {
   border-collapse: collapse; }
   .highlighttable td.linenos, .highlighttable td.code {
