@@ -29,7 +29,7 @@ getting it to work on my Arch Linux media computer.
 > the slide out keyboard, where as mine puts them on the left side of the slide
 > out keyboard.
 
-A lot of this information has been adapted fro
+A lot of this information has been adapted from
 [this page on the Kodi wiki](http://kodi.wiki/view/TiVo_Slide).
 
 # Step 1: Connecting it
