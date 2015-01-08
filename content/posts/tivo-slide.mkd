@@ -4,6 +4,10 @@ category: posts
 tags: [arch, config]
 ---
 
+<aside class="thumb">
+    <img src="/img/tivo-remote.jpg">
+</aside>
+
 I've got a media computer in my living room hooked up to a TV. It runs
 <strike>XBMC</strike> Kodi. It's pretty nice, except it's hard to find a good
 controller for it. Wireless keyboards work, but are awfully awkward on the
