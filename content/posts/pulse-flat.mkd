@@ -1,0 +1,51 @@
+title: Pulse Audio, Spotify, and flat volume
+date: 2015-02-11
+category: posts
+tags: [arch, config, spotify, pulseaudio]
+---
+
+Spotify is a pretty cool music service, and I really enjoy Pulse Audio,
+especially when combined with tools like pasystray and pavucontrol. Together
+they have a bit of an annoying "feature" though.
+
+Spotify is smart enough to link its internal volume meter with Pulse's stream
+volume for Spotify. However, for some reason, Spotify also links the stream's
+volume to the master volume for the sound device spotify is on. Blech! That
+means that when you grap the volume slider in Spotify, *everything* on the
+system gets louder.
+
+The fix for this, luckily, is simple. This is, I am told a "feature" of Pulse
+Audio called "flat volumes", and it is supposed to do better things. In
+practice though, I find it doesn't work and I'd rather just control volume
+myself.
+
+To turn this off, in Arch Linux at least, is pretty simple. In
+`/etc/pulseaudio/daemon.conf` there is line like
+
+```conf
+; flat-volums = yes
+```
+
+The `;` is a comment marker in this file. Uncomment that line and change the
+value to `no`. Now there is no silly linking of volume meters, and I can
+control volumes independently.
+
+---
+
+This has been bugging me for a while, but not enough to do anything. The straw
+that broke the camels back is my new USB soudn card. For reasons I don't
+understand, the internal sound card on my Thinkpad dock doesn't work in Linux.
+This is pretty easy to work around. Get a USB sound card, plug that into the
+dock, and plug my headphones into *that*.
+
+This works nicely, except the particular USB sound card I got is apparently a
+bit wonky. If I grab the volume meter in Pulse Audio and lower it below about
+36%, the sound cuts off. Apparently that is as quiet as it will go.
+
+Unfortunatly, having Spotify and the sound card both set to 36% volume is too
+loud. The solution is to slide Spotify down to around 20%, which sounds good.
+Except sliding Spotify down with `flat-volume = yes` also lowers the sound
+card's master volume, making it cut to mute.
+
+The fix above lets me set Spotify's volume independently, so now I can get a
+comfortable listening volume on my headphones through my dock. Yay!
