@@ -1,0 +1,126 @@
+title: systemd, tmux, and WeeChat
+date: 2015-02-15
+category: posts
+tags: [arch, config, systemd, weechat, tmux]
+---
+
+Today, [edunham][] posted [a recipe for starting screen+irssi at boot using
+rc.local][irssiboot]. That's pretty cool (and useful!), but it doesn't fit
+into my set up very well. I know that some time this week, my VPS provider
+will be doing maintenance and rebooting my shell server, so it seemed like a
+good time set up a more automatic persistent IRC.
+
+[edunham]: http://edunham.net
+[irssiboot]: http://edunham.net/2015/02/15/starting_screen_irssi_at_boot.html
+
+My setup is different in 3 key ways: I don't use screen, I don't use irssi,
+and I don't (want to) use rc.local. Instead I've got tmux, WeeChat, and
+systemd. I figure these three things are roughly equivalent, so I set off to
+try and apply the same idea to my setup.
+
+## Step 1: Systemd user sessions
+
+I could run this as root and hard code my user into the init files, or be
+clever and try and make the user configurable, and somehow allow for multiple
+user sessions (I'm not the only one to use this box) and *blah blah blah*.
+This all sounds not quite right. This is a service just for me, right? It
+should run as me! Luckily, systemd has a user mode that works well for this.
+On my VPS, which is running an up-to-date Arch installation, this Just
+Worked™. Systemd had already helpfully created user sessions where needed.
+Awesome.
+
+To see if this was true, I used this command:
+
+```shell
+$ pgrep -fau $(whoami) systemd
+261 /usr/lib/systemd/systemd --user
+```
+
+## Step 2: Making a service file
+
+After some Googling, I figured out that I should "just" be able to start a tmux
+session with WeeChat from a systemd service file. This is straight forward
+after you know how to do it, but the docs are a bit hard to wade through.
+
+In the end, I learned that I need a `.service` unit file in my systemd user
+configuration directory, that looks like this:
+
+<span class="codepath">~/.config/systemd/user/weechat.service</span>
+
+```systemd
+[Unit]
+Description=Weechat IRC Client (in tmux)
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/bin/tmux -2 new-session -d -s irc /usr/bin/weechat
+ExecStop=/usr/bin/tmux kill-session -t irc
+
+[Install]
+WantedBy=default.target
+```
+
+Some of this is self explanatory. The syntax is INI style, so the things in
+square brackets are section titles. I'm not going to explain `Description`,
+`ExecStart`, or `ExecStop`. I hope they are obvious.
+
+The others are a bit more subtle. From top to bottom:
+
+* `Type=oneshot`: This tells systemd that this service file will run a
+command, and that command will run and do something and then exist. Because
+tmux will "own" the process outside of the systemd controlled cgroup. It will
+get executed by the tmux server. At least, as I understand it.
+* `RemainAfterExit=yes`: This tells systemd that the above is sort of a lie.
+In particular, it indicates that the service should be kept in the "running"
+state even though systemd can't tell that something is running. In particular,
+this lets us stop the service nicely using the `ExecStop` definition.
+`WantedBy=default.target`: This simply tells systemd what to do when we
+"enable" this unit. In systemd parlance, enable usually means "start at boot",
+but it doesn't have to. In this case, it means start at boot.
+
+The `ExecStart` and `ExecStop` lines start and stop a decently customized tmux
+session to run WeeChat in, respectively.
+
+## Step 3: Headdesk
+
+The above unit file took a while to figure out. For one, the `-d` flag to tmux
+isn't entirely obvious. That tells tmux to start the session detached, which
+is important since systemd won't get it a TTY to put anything on.
+
+The `Type=oneshot` and `RemainAfterExit=yes` was particularly hard to find. I
+eventually found someone else's [systemd user unit files][suuf] that started a
+program in tmux, and they used it. Yay for Googling.
+
+[suuf]: https://bitbucket.org/KaiSforza/systemd-user-units/src/07d6ec2916ced3404243cc6a7987e229ab621fe0/tmuxmain.service
+
+The final piece in the puzzle was the most frustrating. I started the service
+and systemd claimed it was running, and `pgrep` agreed. But tmux refused to
+connect with the error "no sessions".
+
+I'm not sure why this is the case, but [this post on a systemd mailing
+list][mail] led me to try running `$ sudo loginctl enable-linger $(whoami)`.
+That worked! Now when I start the session, it creates a session I can actually
+attach to. Win!
+
+[mail]: http://comments.gmane.org/gmane.comp.sysutils.systemd.devel/16421
+
+## All together now
+
+After putting all the above in place, I can now do:
+
+```shell
+# Enable the service to start at boot time.
+$ systemctl --user enable weechat.service
+Created symlink from /home/mythmon/.config/systemd/user/default.target.wants/weechat.service to /home/mythmon/.config/systemd/user/weechat.service.
+# Start the service.
+$ systemctl --user start weechat.service
+# Attach to the new tmux session.
+$ tmux attach -t irc
+```
+
+I was presented with a brand new instance of WeeChat. Success!
+
+I still have some automation to do within WeeChat, like connecting to some
+servers that require passwords and joining all the right channels, but this
+seemed like the harder part to me, so I'm glad to have it out of the way.
