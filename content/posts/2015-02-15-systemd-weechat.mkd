@@ -31,7 +31,7 @@ Awesome.
 
 To see if this was true, I used this command:
 
-```shell
+```bash
 $ pgrep -fau $(whoami) systemd
 261 /usr/lib/systemd/systemd --user
 ```
@@ -109,10 +109,11 @@ attach to. Win!
 
 After putting all the above in place, I can now do:
 
-```shell
+```bash
 # Enable the service to start at boot time.
 $ systemctl --user enable weechat.service
-Created symlink from /home/mythmon/.config/systemd/user/default.target.wants/weechat.service to /home/mythmon/.config/systemd/user/weechat.service.
+Created symlink from /home/mythmon/.config/systemd/user/default.target.wants/weechat.service
+    to /home/mythmon/.config/systemd/user/weechat.service.
 # Start the service.
 $ systemctl --user start weechat.service
 # Attach to the new tmux session.
