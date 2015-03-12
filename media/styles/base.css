@@ -139,3 +139,7 @@ code {
   #wrap > footer p {
     margin: 0 10px 0 0;
     display: inline; }
+
+.changetip_tipme_button {
+  display: inline-block;
+}
