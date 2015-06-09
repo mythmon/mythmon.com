@@ -79,14 +79,14 @@ back about 50 lines, which aren't interesting to the point I'm making here.
 ```net
 > NICK mythmon
 > USER mythmon mythmon localhost :Unknown
-< :wolfe.freenode.net 001 notmythmon :Welcome to the freenode Internet Relay Chat Network notmythmon
+< :wolfe.freenode.net 001 mythmon :Welcome to the freenode Internet Relay Chat Network mythmon
 <snip>
-< :wolfe.freenode.net 375 notmythmon :- wolfe.freenode.net Message of the Day -
-< :wolfe.freenode.net 372 notmythmon :- Welcome to wolfe.freenode.net in Stockholm, SE.
-< :wolfe.freenode.net 372 notmythmon :- Thanks to http://www.portlane.com/ for sponsoring
+< :wolfe.freenode.net 375 mythmon :- wolfe.freenode.net Message of the Day -
+< :wolfe.freenode.net 372 mythmon :- Welcome to wolfe.freenode.net in Stockholm, SE.
+< :wolfe.freenode.net 372 mythmon :- Thanks to http://www.portlane.com/ for sponsoring
 <snip>
-< :wolfe.freenode.net 376 notmythmon :End of /MOTD command.
-< :notmythmon MODE notmythmon :+i
+< :wolfe.freenode.net 376 mythmon :End of /MOTD command.
+< :mythmon MODE mythmon :+i
 ```
 
 A combination of reading this and reading the RFC teaches me that there are
