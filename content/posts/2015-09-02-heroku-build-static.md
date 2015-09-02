@@ -60,7 +60,7 @@ https://github.com/heroku/heroku-buildpack-nodejs.git
 https://github.com/heroku/heroku-buildpack-python.git
 ```
 
-Buildpacks are exeucted in the order they're listed in, allowing later
+Buildpacks are executed in the order they're listed in, allowing later
 buildpacks to use the tools and scripts installed by earlier buildpacks.
 
 The Problem With Python
