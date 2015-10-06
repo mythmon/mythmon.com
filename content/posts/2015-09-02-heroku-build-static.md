@@ -39,9 +39,9 @@ steps back.
 
 Enter [Multi Buildpack][], which runs multiple buildpacks at once.
 
-It is simple enough that it is unlike to fall out of compatibility. Heroku has a
-fork of the project on their GitHub account, which implies that it will be
-maintained in the future.
+It is simple enough that it is unlikely to fall out of compatibility. Heroku
+has a fork of the project on their GitHub account, which implies that it will
+be maintained in the future.
 
 [Multi Buildpack]: https://github.com/heroku/heroku-buildpack-multi
 
