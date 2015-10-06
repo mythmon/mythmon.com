@@ -102,7 +102,7 @@ buildpack from running `collectstatic`, since it will fail anyways. This is done
 using an environment variable:
 
 ```bash
-heroku config:set DISABLE_COLLECTSTATIC 1
+heroku config:set DISABLE_COLLECTSTATIC=1
 ```
 
 > Okay, so there is a little hack here. We still had to append the Node binary
