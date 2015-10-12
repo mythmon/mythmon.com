@@ -1,7 +1,7 @@
 title: Footer
 make_file: no
 ---
-&copy;2011&ndash;2014 Mike Cooper
+&copy;2011&ndash;2015 Mike Cooper, et. al.
 
 This site is powered by [wok][].
 
