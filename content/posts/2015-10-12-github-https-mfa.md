@@ -30,7 +30,7 @@ Typing in usernames and passwords every time is really annoying though. There
 are also some other issues to work out. Here is what I've discovered to make
 things even better:
 
-## Savings passwords
+## Saving passwords
 
 Most desktop environments have a way to store secrets. I use Gnome Keyring.[^1]
 Git knows how to tie into secret-storage systems like this, but it needs some
@@ -75,9 +75,9 @@ password are included right in the URL.
 
 There is no place in this scheme for a MFA code. So we cheat. GitHub supports
 using "personal access tokens" for authentication. These are long hexadecimal
-strings. They easily revocable, and can be scoped to only certain permissions.
-Because of this, GitHub will treat them as username, password, and MFA code all
-in one.
+strings. They are easily revocable, and can be scoped to only certain
+permissions. Because of this, GitHub will treat them as username, password, and
+MFA code all in one.
 
 To get one, follow these steps
 
