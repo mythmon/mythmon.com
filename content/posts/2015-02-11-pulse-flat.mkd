@@ -10,14 +10,13 @@ they have a bit of an annoying "feature" though.
 
 Spotify is smart enough to link its internal volume meter with Pulse's stream
 volume for Spotify. However, for some reason, Spotify also links the stream's
-volume to the master volume for the sound device spotify is on. Blech! That
-means that when you grap the volume slider in Spotify, *everything* on the
+volume to the master volume for the sound device Spotify is on. Blech! That
+means that when you grab the volume slider in Spotify, *everything* on the
 system gets louder.
 
-The fix for this, luckily, is simple. This is, I am told a "feature" of Pulse
-Audio called "flat volumes", and it is supposed to do better things. In
-practice though, I find it doesn't work and I'd rather just control volume
-myself.
+This is, I am told, a "feature" of Pulse Audio called "flat volumes", and it is
+supposed to do better things. In practice though, I find it doesn't work and
+I'd rather just control volume myself. The fix for this, luckily, is simple.
 
 To turn this off, in Arch Linux at least, is pretty simple. In
 `/etc/pulseaudio/daemon.conf` there is line like
