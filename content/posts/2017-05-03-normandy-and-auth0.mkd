@@ -1,12 +1,12 @@
-title: Switching Normandy to use Auth0
+title: Switching Normandy to use OIDC
 date: 2016-05-03
 category: posts
 tags: [mozilla, normandy]
 ---
 
-Recently [Normandy][] switched from authenticating ourselves users
-with boring username and passwords to using Auth0 to authenticate
-users more securely.
+Recently [Normandy][] switched from authenticating users ourselves
+with boring username and passwords to using Mozilla's OIDC SSO
+to authenticate users more securely.
 
 Normandy is a web service that holds a lot of influence over
 Firefox. Because of this, we have had [a list of security
@@ -14,7 +14,7 @@ features][sec-checklist] we've been working through. One of the big
 items on this list was to not store passwords, and do authentication
 of users ourselves.
 
-We chose to use Auth0 for this, primarily because it is the
+We chose to use OIDC for this, primarily because it is the
 new hotness as far as authenticating Mozillians. It can use many
 sources of authentication, including Mozilla's LDAP servers, the
 canonical source of employee user data. This is exactly what we want
@@ -24,21 +24,21 @@ to use for Normandy.
 # Overview
 
 Normandy is a Django app, so we initially explored doing the
-integration with Auth0 directly in the app. The idea would be to use
-an existing OpenIDC library to authenticate users with Auth0, and
+integration with OIDC directly in the app. The idea would be to use
+an existing OIDC library to authenticate users with the Mozilla OIDC SSO, and
 correlate that to the existing users of the system via email address.
 
 Unfortunately, we weren't able to get any of the libraries to
 work for us. The major problems we ran into were incompatibilities with
-something in our stack (Python 3.6 or Auth0 specifically) or the
+something in our stack (Python 3.6 or OIDC specifically) or the
 implementation being too complex.
 
 Instead we chose an easier process. Normandy is fronted by Nginx,
 which does some work with caching and logging. Our operations team
-has a Auth0 integration that works with our Nginx frontend. It passes
+has an Nginx access-proxy integration that works with our Nginx frontend. It passes
 authentication details to our app via the HTTP header
 `Remote-User`. This solution was much easier to implement: essentially
-we flipped a flag in puppet, and we started getting authentication
+we flipped a flag in Puppet, and we started getting authentication
 headers.
 
 
@@ -63,13 +63,14 @@ changes [in this pull request][normandy#569].
 
 # Changes to Nginx
 
-To send this header to Normandy, we modified the Nginx configurations to
-perform authentication via OpenIDC with Auth0. That was implemented
+To implement the Nginx part of this, we modified the configuration to
+perform authentication via OIDC with Mozilla's SSO. That was implemented
 with [lua-resty-openidc][].
 
-When a request comes in to Nginx, it checks if the request has cookies
-that already authenticate it via OpenIDC. If it does not, Nginx redirects
-the request to Auth0 to perform authentication, which then redirects
+When an HTTP request comes in to Nginx with a url covered by OIDC authentication,
+Nginx checks if the request has cookies
+that already authenticate it via OIDC. If it does not, Nginx redirects
+the request to Mozilla's SSO to perform authentication, which then redirects
 the user back to Nginx with authentication tokens to log the user
 in. Nginx validates these tokens, and then proxies the request to
 Normandy with the `Remote-User` header to set.
@@ -81,8 +82,8 @@ any user simply by passing a HTTP header. That would be bad.
 
 # Migrating
 
-Mozilla's Auth0 uses a user's LDAP email address as their
-username. That's what gets passed to Normandy in the `Remote-User`
+The OIDC claim information identifies a user by email address and
+that's what gets passed to Normandy in the `Remote-User`
 header. The `RemoteUserBackend` authenticates users by matching that
 header to the `username` field of Django `User` models. Normandy has
 very few users, and all of them are Mozilla employees, so we know they
@@ -132,6 +133,7 @@ class Migration(migrations.Migration):
 # Challenges
 
 ## All or Nothing
+
 One of the major challenges in this system is that the rules for
 whether a user needs to be authenticated are not are necessarily very
 simple. Nginx can't really implement application level logic to decide
