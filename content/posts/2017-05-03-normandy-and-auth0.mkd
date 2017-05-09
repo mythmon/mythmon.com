@@ -46,7 +46,7 @@ headers.
 
 Of course, sending the headers isn't enough. We also have to configure
 the app to read those headers and act accordingly. We did this with
-Django's [`RemoteUserBackend`][]. This works by adding a middleware
+Django's [RemoteUserBackend][]. This works by adding a middleware
 that annotates all requests with information about the authentication
 header, and an authentication backend that reads that information to
 sign a user in or out. If a user is authenticated via the
@@ -185,6 +185,6 @@ management and better security.
 
 [Normandy]: https://github.com/mozilla/normandy/
 [sec-checklist]: https://github.com/mozilla/normandy/issues/286
-[`RemoteUserBackend`]: https://docs.djangoproject.com/en/1.11/howto/auth-remote-user/
+[RemoteUserBackend]: https://docs.djangoproject.com/en/1.11/howto/auth-remote-user/
 [normandy#569]: https://github.com/mozilla/normandy/pull/569/files
 [lua-resty-openidc]: https://github.com/pingidentity/lua-resty-openidc
