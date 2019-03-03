@@ -13,6 +13,7 @@ import { Helmet } from "react-helmet";
 import Header from "./Header";
 import Footer from "./Footer";
 import icon from "../../images/icon.png";
+import "../css/base.css";
 
 const Layout = ({ children }) => (
   <StaticQuery

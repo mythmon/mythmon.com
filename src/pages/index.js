@@ -4,7 +4,6 @@ import { Link, graphql } from "gatsby";
 
 import Layout from "../components/Layout";
 import PostHeader from "../components/PostHeader";
-import "../css/base.css";
 
 export default function IndexPage({ data }) {
   const posts = data.allMarkdownRemark.edges.map(e => e.node);
