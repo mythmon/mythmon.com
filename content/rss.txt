@@ -1,6 +1,0 @@
-title: Blog Feed
-slug: feed
-type: feed
-comment: All of this page's content comes from the template.
-rss_category: posts
----

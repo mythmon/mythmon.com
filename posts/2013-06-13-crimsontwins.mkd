@@ -1,0 +1,101 @@
+---
+title: The Crimson Twins
+slug: crimson-twins
+date: 2013-06-13
+category: posts
+tags: [projects, crimson twins, mozilla]
+---
+
+Crimson Twins is a project that I started at Mozilla to power two ambient
+displays that we mounted on the wall in the Mountain View Mozilla office. We
+use it to show dashboards, such as the current status of the sprint or the
+state of GitHub. We also use it to share useful sites, such as posting a
+YouTube video that is related to the current conversation. Most of the time
+that I pay attention to the Twins, is when my coworkers and I post amusing
+animated GIFs to <s>distract</s> amuse the rest of the office.
+
+<!-- fold -->
+
+## Technical Details
+
+Crimson Twins is a Node.JS app that is currently running on Mozilla's internal
+PaaS, an instance of Stackato. It uses Socket.io for real time two way
+communication between the server and the client. Socket.io uses WebSockets,
+long polling, Flash sockets, or a myriad of other techniques.
+
+The architecture of the system is that there are a small number of virtual
+screens, which represent targets to send content to. Each client connected to
+the server can choose one or more of these virtual screens to display. A client
+can be any modern web browser, and I have used Firefox for Desktop and
+Android, Safari on iOS, and Chrome on desktop without any trouble.
+
+Because of this setup, remote Mozillians can connect to the server and load up
+the same things that are shown on the TVs in the office. Put another way,
+Crimson Twins is remotie friendly, and people can play along at home.
+
+### Content Handling
+
+Content is displayed with one of two mechanisms. For images, the content is
+loaded as a background of a div. Originally img tags were used, but it was
+difficult to style them this way. The switch to divs made it much easier to
+zoom the image to full screen without using JavaScript.
+
+For content that is not images, a sandboxed iframe is used. This allows most
+sites to be shown with Crimson Twins, and the sandboxing prevents malicious
+sites from hijacking the Crimson Twins container[^1]. This means that sites
+that disallow framing cannot be used with the system, but after much
+brainstorming we have yet to find a satisfactory way to get around this.
+Luckily most sites don't worry about iframes, so this isn't normally a huge
+annoyance.
+
+For every URL that is sent to the screens, the sever first makes a HEAD request
+to the requested resource. A few things happen with this information. First, it
+is used to determine if the URL is an image or not, by examining content type.
+Second, it examines the headers to find things, such as `X-Frames-Options: deny`, server errors, or malformed URLs; it provides useful error messages if
+something like this happens.
+
+Additionally, the requested URLs can go through various transformations. For
+example, if a link to an Imgur page is posted, the server will transform the
+URL into the URL for the image on the page. A link to an XKCD comic page will
+query the [XKCD API] for the URL of the image for that comic. This mechanism
+also allows for black listing of various content.
+
+[^1]:
+
+  Due to [bug 785310], Firefox allows sandboxed iframes with scripts
+  enabled to directly access the parent document, which is a violation of the
+  spec. Hopefully this bug will be fixed in the near future.
+
+[bug 785310]: https://bugzilla.mozilla.org/show_bug.cgi?id=785310
+[xkcd api]: http://xkcd.com/json.html
+
+## What's with the name?
+
+The name of the project is a little silly, and is (I'm told) a reference to the
+old G.I. Joe cartoons. One of the enemies in the show were the twins [Tomax and
+Xamot][wpct], collectively known as the Crimson Twins. It was proposed
+humorously, but I decided to keep it, and now I rarely think about the cartoon
+series anymore.
+
+It has enough related names that the related projects that have sprung up have
+been easy to name, such as the Crimson Guard Commanders, the IRC name for one
+of the bots that interfaces with the API; and [Extensive Enterprises][ghee], a
+web based camera-to-Imgur-to-IRC-to-CrimsonTwins roundabout way to post photos
+to the screens.
+
+[wpct]: http://en.wikipedia.org/wiki/Tomax_and_Xamot
+[ghee]: https://github.com/mattbasta/extensive-enterprises
+
+## The Future
+
+Crimson Twins has been proposed to be used as ambient displays in the public
+areas of various Mozilla offices, and as a general purpose manager for driving
+screens. To this end it is probably going to grow features such as remote
+control of clients, a more powerful API, and features to make it easy to manage
+remotely.
+
+CrimsonTwins is open source, and can be found [on GitHub][ghct]. Pull requests
+are welcome, and if you want to chat about it, you can find me as mythmon in
+#bots on irc.mozilla.org.
+
+[ghct]: https://github.com/mythmon/crimsontwins/

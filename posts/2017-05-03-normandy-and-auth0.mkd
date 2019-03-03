@@ -1,0 +1,187 @@
+---
+title: Switching Normandy to use OIDC
+slug: normandy-and-auth0
+date: 2017-05-03
+category: posts
+tags: [mozilla, normandy]
+---
+
+Recently [Normandy][] switched from authenticating users ourselves
+with boring username and passwords to using Mozilla's OIDC SSO
+to authenticate users more securely.
+
+Normandy is a web service that holds a lot of influence over
+Firefox. Because of this, we have had [a list of security
+features][sec-checklist] we've been working through. One of the big
+items on this list was to not store passwords, and do authentication
+of users ourselves.
+
+We chose to use OIDC for this, primarily because it is the
+new hotness as far as authenticating Mozillians. It can use many
+sources of authentication, including Mozilla's LDAP servers, the
+canonical source of employee user data. This is exactly what we want
+to use for Normandy.
+
+<!-- fold -->
+
+# Overview
+
+Normandy is a Django app, so we initially explored doing the
+integration with OIDC directly in the app. The idea would be to use
+an existing OIDC library to authenticate users with the Mozilla OIDC SSO, and
+correlate that to the existing users of the system via email address.
+
+Unfortunately, we weren't able to get any of the libraries to
+work for us. The major problems we ran into were incompatibilities with
+something in our stack (Python 3.6 or OIDC specifically) or the
+implementation being too complex.
+
+Instead we chose an easier process. Normandy is fronted by Nginx,
+which does some work with caching and logging. Our operations team
+has an Nginx access-proxy integration that works with our Nginx frontend. It passes
+authentication details to our app via the HTTP header
+`Remote-User`. This solution was much easier to implement: essentially
+we flipped a flag in Puppet, and we started getting authentication
+headers.
+
+# Changes to Django
+
+Of course, sending the headers isn't enough. We also have to configure
+the app to read those headers and act accordingly. We did this with
+Django's [RemoteUserBackend][]. This works by adding a middleware
+that annotates all requests with information about the authentication
+header, and an authentication backend that reads that information to
+sign a user in or out. If a user is authenticated via the
+`Remote-User` header, but does not exist in the database, the backend
+automatically creates the user and signs them in.
+
+The default settings worked well for us. The only modification we
+needed was to tie it into our logging and settings systems. A
+simplified version of the changes is to add `RemoteUserMiddleware` to
+the `MIDDLEWARE` setting, and adding `RemoteUserBackend` to
+`AUTHENTICATION_BACKENDS`. You can see the full
+changes [in this pull request][normandy#569].
+
+# Changes to Nginx
+
+To implement the Nginx part of this, we modified the configuration to
+perform authentication via OIDC with Mozilla's SSO. That was implemented
+with [lua-resty-openidc][].
+
+When an HTTP request comes in to Nginx with a url covered by OIDC authentication,
+Nginx checks if the request has cookies
+that already authenticate it via OIDC. If it does not, Nginx redirects
+the request to Mozilla's SSO to perform authentication, which then redirects
+the user back to Nginx with authentication tokens to log the user
+in. Nginx validates these tokens, and then proxies the request to
+Normandy with the `Remote-User` header to set.
+
+Importantly, Nginx also strips any value of `Remote-User` that
+external users try to use. This way we don't allow users to sign in as
+any user simply by passing a HTTP header. That would be bad.
+
+# Migrating
+
+The OIDC claim information identifies a user by email address and
+that's what gets passed to Normandy in the `Remote-User`
+header. The `RemoteUserBackend` authenticates users by matching that
+header to the `username` field of Django `User` models. Normandy has
+very few users, and all of them are Mozilla employees, so we know they
+all have LDAP emails. We wrote a migration to copy our users email
+addresses from `User.email` to `User.username` to accommodate this.
+
+Here is a slightly abbreviated version of the migration:
+
+```python
+from django.conf import settings
+from django.db import migrations
+
+
+def email_to_username(apps, schema_editor):
+    """
+    Copy emails to usernames for all users.
+    """
+    User = apps.get_model('auth', 'User')
+    for user in User.objects.all():
+        if user.email:
+            user.username = user.email
+            user.save()
+
+
+def remove_email_from_username(apps, schema_editor):
+    """
+    Copy emails to usernames for all users.
+    """
+    User = apps.get_model('auth', 'User')
+    for user in User.objects.all():
+        if '@' in user.username:
+            user.username = user.username.split('@')[0]
+            user.save()
+
+
+class Migration(migrations.Migration):
+
+    dependencies = [
+        migrations.swappable_dependency(settings.AUTH_USER_MODEL),
+    ]
+
+    operations = [
+        migrations.RunPython(email_to_username, remove_email_from_username),
+]
+```
+
+# Challenges
+
+## All or Nothing
+
+One of the major challenges in this system is that the rules for
+whether a user needs to be authenticated are not are necessarily very
+simple. Nginx can't really implement application level logic to decide
+if a user needs authenticated or not.
+
+Before this system, we would allow certain views to be accessed by
+both authenticated users and anonymous users. We then used Django's
+permission models to decide if a user was allowed to do what they were
+trying to do. For example, the Normandy recipe listing page would
+allow an anonymous user to see the list of recipes, and an
+authenticated user to create a new recipe if they were in the correct
+group.
+
+This isn't something we could do with Nginx. We could protect certain
+part of the site by URL, and it had to be all or nothing: Either a
+user was authenticated on that portion of the site, or the
+authentication header would never be passed, and all users would be
+anonymous. This turned out to be a minor annoyance for us, but I could
+imagine it being a huge problem for other sites.
+
+We have two kinds of servers. One is read-only, and the other is
+read-write. The read-write version is only accessible over VPN, and
+only by Mozilla employees. It was easy to simply make the entire
+read-write server require authentication. Mixing authentication on one
+server would be challenging, because you'd have to carefully design
+your URL structure to separate authenticated and unauthenticted parts
+of the site.
+
+## Non-Browser Usage
+
+The authentication flow outlined above relies heavily on having a web
+browser and a human around. We haven't figured out how to authenticate
+non-human users, such as shell scripts that use curl to automate
+requests to the API to make repetitive changes.
+
+This is a minor use case that for now we've simply dropped. Some day
+in the future we may re-visit it and try to figure out a better work
+flow for these kind of changes.
+
+---
+
+Overall, the migration to using Auth0 has gone well, and we didn't
+have any major problems deploying it. We had to give up some control
+over authentication of users, but in exchange we have very easy user
+management and better security.
+
+[normandy]: https://github.com/mozilla/normandy/
+[sec-checklist]: https://github.com/mozilla/normandy/issues/286
+[remoteuserbackend]: https://docs.djangoproject.com/en/1.11/howto/auth-remote-user/
+[normandy#569]: https://github.com/mozilla/normandy/pull/569/files
+[lua-resty-openidc]: https://github.com/pingidentity/lua-resty-openidc

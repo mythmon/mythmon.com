@@ -1,0 +1,179 @@
+---
+title: Tracking Deploys in Git Log.
+slug: git-tricks
+date: 2013-11-18
+category: posts
+tags: [tools, sumo, git]
+---
+
+Knowing what is going on with git and many environments can be hard. In
+particular, it can be hard to easily know where the server environments are on
+the git history, and how the rest of the world relates to that. I've set up a
+couple interlocking gears of tooling that help me know whats going on.
+
+<!-- fold -->
+
+## Network
+
+One thing that I love about GitHub is it's [network view](corsica net), which
+gives a nice high level overview of branches and forks in a project. One thing
+I don't like about it is that it only shows what is on GitHub, and is a bit
+light on details. So I did some hunting, and I found a set of git commands that
+does a pretty good at replicating GitHub's network view.
+
+[neturl]: https://github.com/mythmon/corsica/network
+
+    ::bash
+    $ git log --graph --all --decorate
+
+<aside class="thumb">
+    <img src="images/gitnet.png">
+    <p><code>git net</code> <small>(click to embiggen)</small></p>
+</aside>
+
+I have this aliased to `git net`. Let's break it down:
+
+- `git log` - This shows the history of commits.
+- `--graph` - This adds lines between commits showing merging, branching, and
+  all the rest of the non-linearity git allows in history.
+- `--all` - This shows all refs in your repo, instead of only your current branch.
+- `--decorate` - This shows the name of each ref net to each commit, like
+  "origin/master" or "upstream/master".
+
+This isn't that novel, but it is really nice. I often get asked what tool I'm
+using for this when I pull this up where other people can see it.
+
+## Cron Jobs
+
+Having all the extra detail in my view of git's history is nice, but it doesn't
+help if I can only see what is on my laptop. I generally know what I've
+commited (on a good day), so the real goal here is to see what is in all of my
+remotes.
+
+In practice, I only have this done for my main day-job project, so the update
+script is specific to that project. It could be expanded to all my git repos,
+but I haven't done that. To pull this off, I have this line in my crontab:
+
+    ::cron
+    */10 * * * * python2 /home/mythmon/src/kitsune/scripts/update-git.py
+
+I'll get to the details of this script in the next section, but the important
+part is that it runs `git fetch --all` for the repo on question. To run this
+from a cronjob, I had to switch all my remotes to using `https` protocol for
+git instead of `ssh`, since my SSH keys aren't unlocked. Git knows the
+passwords to my http remotes thanks to it's gnome-keychain integration, so this
+all works without user interaction.
+
+This has the result of keeping git up to date on what refs exist in the world.
+I have my teammate's repos as remotes, as well as our central master. This
+makes it easier for me to see what is going on in the world.
+
+## Deployment Refs
+
+The last bit of information I wanted to see in my local network is the state of
+deployment on our servers. We have three environments that run our code, and
+knowing what I'm about to deploy is really useful. If you look in the
+screenshot above, you'll notice a couple refs that are likely unfamiliar:
+`deployed/state` and `deployed/prod`, in green. This is the second part of the
+`update-git.py` script I mentioned above.
+
+As a part of the SUMO deploy process, we put a file on the server that contains
+the current git sha. This script read that file, and makes local references in
+my git repo that correspond to them
+
+<aside>
+    <h3>What's a git ref?</h3>
+
+    <p>
+        A git ref is anything that has a commit sha. So master is a ref. So
+        are any other branches you create. Git also tracks remote content in
+        the same way, in refs under <code>refs/remotes</code>.
+    </p>
+
+    <p>
+        In short, a git ref is a generalization of tags, and branches, both
+        remote and locale. It is how git keeps track of things with names, and
+        it is what is written on the graph when <code>--decorate</code> is
+        passed to log.
+    </p>
+
+</aside>
+
+Wait, creates git refs from thin air? Yeah. This is a cool trick my friend
+Jordan Evans taught me about git. Since git's references are just files on the
+file system, you can make new ones easily. For example, in any git repo, the
+file `.git/refs/heads/master` contains a commit sha, which is how git knows
+where your master branch is. You could make new refs by editing these files
+manually, creating files and overwriting them to manipulate git. That's a
+little messy though. Instead we should use git's tools to do this.
+
+Git provides `git update-ref` to manipulate refs. For example, to make my
+deployment refs, I run something like `git update-ref refs/heas/deployed/prod 895e1e5ae`. The last argument can be any sort of commit reference, including
+`HEAD` or branch names. If the ref doesn't exist, it will be created, and if
+you want to delete a ref, you can add `-d`. Cool stuff.
+
+## All Together Now
+
+Now finally the entire script. Here I am using an git helper that I wrote that
+I have ommited for space. It works how you would expect, translating
+`git.log(all=True, 'some-branch'` to `git log --all some-branch`. I made [a
+gist of it]() for the curious.
+
+The basic strategy is to get fetch all remotes, then add/update the refs for
+the various server environments using `git update-rev`. This is run on a cron
+every few minutes, and makes knowing what is going on a little easier, and git
+in a distributed team a little nicer.
+
+    ::python
+    #!/usr/bin/env python
+
+    import os
+    import re
+    import subprocess
+
+    import requests
+
+
+    repo_dir = "{HOME}/src/kitsune".format(**os.environ)
+    environments = {
+        'dev': 'http://support-dev.allizom.org/media/revision.txt',
+        'stage': 'http://support.allizom.org/media/revision.txt',
+        'prod': 'http://support.mozilla.org/media/revision.txt',
+    }
+
+
+    def main():
+        cdpath = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..')
+        os.chdir(cdpath)
+
+        git = Git()
+
+        print(git.fetch(all=True))
+        for env_name, revision_url in environments.items():
+            try:
+                cur_rev = git.rev_parse('deployed/' + env_name).strip()
+            except subprocess.CalledProcessError:
+                cur_rev = None
+            new_rev = requests.get(revision_url).text.strip()
+
+            if cur_rev != new_rev:
+                print 'updating ' + env_name, cur_rev[:8], new_rev[:8]
+                git.update_ref('refs/heads/deployed/' + env_name, new_rev)
+
+
+    if __name__ == '__main__':
+        main()
+
+[a gist of it]: https://gist.github.com/mythmon/7536335
+
+## That's It
+
+The general idea is really easy:
+
+1. Fetch remotes often.
+2. Write down deployment shas.
+3. Actually look at it all.
+
+The fact that it requires a little bit of cleverness, and a bit of git magic
+along the way means it took some time figure out. I think it was [well worth it
+though](http://xkcd.com/1205/).

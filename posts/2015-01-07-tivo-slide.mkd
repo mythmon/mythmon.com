@@ -1,0 +1,167 @@
+---
+title: TiVo Slide in Arch Linux
+slug: tivo-slide
+date: 2015-01-07
+category: posts
+tags: [arch, config]
+---
+
+<aside class="thumb">
+  <img src="images/tivo-remote.jpg">
+</aside>
+
+I've got a media computer in my living room hooked up to a TV. It runs
+<strike>XBMC</strike> Kodi. It's pretty nice, except it's hard to find a good
+controller for it. Wireless keyboards work, but are awfully awkward on the
+couch.
+
+After some searching, I decided my weapon of choice would be a TiVo
+Slide remote. It's (technically) Bluetooth, so no pesky line of sight
+issues, has a secondary IR mode for controlling other devices (TV volume and
+power), has a slide out keyboard, and all of this in something roughly the size
+of your average TV remote.
+
+Trouble is, this is designed to work with TiVos. It can work on normal
+computers, but it's a bit of pain. Here I'm going to write down what I learned
+getting it to work on my Arch Linux media computer.
+
+<!-- fold -->
+
+> I'm using an older version of the remote. I'm not sure if these instructions
+> would work with the "TiVo Slide Pro Remote" that you can buy today. The main
+> physical difference is that the Pro puts a circle of buttons in the middle of
+> the slide out keyboard, where as mine puts them on the left side of the slide
+> out keyboard.
+
+A lot of this information has been adapted from
+[this page on the Kodi wiki](http://kodi.wiki/view/TiVo_Slide).
+
+# Step 1: Connecting it
+
+Earlier I said that the Slide was _technically_ Bluetooth. That's because
+although you can put it in pairing mode and try and connect with it, it's going
+to be a losing battle. The included dongle also is technically Bluetooth, but
+trying to use it as such has only ended in sadness for me.
+
+Fortunately, the dongle has a fallback mode that makes it act as a plain
+ordinary HID device. In this mode, it handles the Bluetooth pairing and
+connection with the remote all on it's own, and it even comes pre-paired out of
+the box. This is a much nicer way of using the device. Unfortunately, the only
+way I can find to trigger this fallback mode is to totally disable Bluetooth on
+the host. (Lucky for me, I have no need of Bluetooth on the box in question).
+
+So, the first order of business is a modprobe blacklist:
+
+<span class="codepath">/etc/modprobe.d/blacklist-bluetooth-tivoslide.conf</span>
+
+    blacklist btusb
+    blacklist bluetooth
+
+You'll either need to reboot or `rmmod` these modules if they are loaded. If
+you plan on rebooting save it for later, it will be easiest if you do it at the
+end.
+
+After this plugging in the Slide's dongle will make it show up as a plain
+keyboard. Testing with `xev` reveals that a bunch of the buttons work,
+generating the right key codes. Good keys to test are any alphabet key on the
+slide out section, and the arrow keys. You may notice however that many keys
+don't work, like Select, or the
+<span style="background: #ff0">A</span>
+<span style="background: #00f">B</span>
+<span style="background: #f00">C</span>
+<span style="background: #0f0">D</span>
+buttons. This is because these buttons generate scan codes that are outside the
+normal range that X11 understands.
+
+# Step 2: Remapping weird scancodes
+
+To bring the scancodes the Slide generates down into the range X11 understands,
+we'll use udev's hwdb. This is the tool that remaps scan code to keys for lots
+of weird keyboards. It compiles it's info from files in various places,
+including `/etc/udev/hwdb.d/*.hwdb`. That's where we are going to put things to
+configure it:
+
+<span class="codepath">/etc/udev/hwdb.d/61-tivo-slide.hwdb</span>
+
+    # Tivo Slide
+    keyboard:usb:v150Ap1201*
+     KEYBOARD_KEY_000C0041=enter     # select
+     KEYBOARD_KEY_000C006C=f2        # A (Yellow)
+     KEYBOARD_KEY_000C006B=f3        # B (Blue)
+     KEYBOARD_KEY_000C0069=f4        # C (Red)
+     KEYBOARD_KEY_000C006A=f5        # D (Green)
+     KEYBOARD_KEY_000C006D=f6        # Zoom
+     KEYBOARD_KEY_000C0082=f7        # Input
+     KEYBOARD_KEY_000C0083=f8        # Enter
+     KEYBOARD_KEY_000C008D=f9        # Guide
+     KEYBOARD_KEY_000C009C=f10       # Chup
+     KEYBOARD_KEY_000C009D=f11       # Chdn
+     KEYBOARD_KEY_000C00B1=playpause # Pause
+     KEYBOARD_KEY_000C00B2=record    # Record
+     KEYBOARD_KEY_000C00F5=stop      # Slow
+
+I'm not sure if the spaces before the `KEYBOARD_KEY` lines are needed. All the
+other hwdb files had them, so I kept them. Feel free to change the result keys
+(the ones after the right) to better match what you want to use the remote for.
+
+After this file is in replace, you can need to regenerate `hwdb.bin`, which is
+the file that udev _actually_. To do that run `udevadm hwdb --update`. Then to
+reload these rules, run `udevadm trigger`. Now the keys listed above should
+work when tested in xev. Yay!
+
+# Step 3: Configuring <strike>XBMC</strike> Kodi.
+
+This part is a normal keymap configuration for Kodi. Anyone who has mapped keys
+in Kodi before should be familiar with this. In your `.xbmc` directory there
+should be a `userdata/keymaps/` directory. Put this file there:
+
+<span class="codepath">.xbmc/userdata/keymaps/tivo.xml</span>
+
+    :::xml
+    <!-- Tivo Slide -->
+    <keymap>
+      <global>
+        <keyboard>
+          <button id="f200">ActivateWindow(home)</button> <!-- Tivo key -->
+          <f1>Select</f1> <!-- Select key -->
+          <f2></f2> <!-- A / Yellow -->
+          <f3></f3> <!-- B / Blue -->
+          <f4>ContextMenu</f4> <!-- C / Red -->
+          <f5></f5> <!-- D / Green -->
+          <f6>AspectRatio</f6> <!-- Zoom key -->
+          <f8>Select</f8> <!-- Lower enter key -->
+          <f9>FullScreen</f9> <!-- Guide Key -->
+          <f10>PageUp</f10> <!-- channel up key -->
+          <f11>PageDown</f11> <!-- channel down key -->
+          <f12>Info</f12> <!-- Guide key -->
+          <prev_track>Back</prev_track> <!-- "instant replay" key -->
+          <home></home> <!-- Live TV key -->
+          <delete>System.LogOff</delete> <!-- Clear key -->
+        </keyboard>
+      </global>
+
+      <FullscreenVideo>
+        <keyboard>
+          <prev_track>SmallStepBack</prev_track> <!-- "instant replay" key -->
+          <next_track>StepForward</next_track> <!-- -> key -->
+          <return>OSD</return>
+          <enter>OSD</enter>
+          <f2>ActivateWindow(osdaudiosettings)</f2> <!-- A (Yellow) -->
+          <f3>ActivateWindow(videobookmarks)</f3> <!-- B (Blue) -->
+          <f4>ActivateWindow(SubtitleSearch)</f4> <!-- C (Red) -->
+          <f5>ActivateWindow(osdvideosettings)</f5> <!-- D (Green) -->
+        </keyboard>
+      </FullscreenVideo>
+
+      <MyVideoLibrary>
+        <keyboard>
+          <f5>ToggleWatched</f5> <!-- D / Green -->
+        </keyboard>
+      </MyVideoLibrary>
+    </keymap>
+
+This is what I use at home, but I'm still tweaking it. Feel free to customize
+it however you like. You won't break anything.
+
+For more information about keymaps in Kodi, you can see the
+[keymap wiki page](http://kodi.wiki/view/keymap).
