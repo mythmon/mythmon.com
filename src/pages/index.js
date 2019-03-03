@@ -15,7 +15,7 @@ export default function IndexPage({ data }) {
         <div key={post.id} className="post">
           <PostHeader post={post} link={true} heading="h2" />
           <div className="post-content" dangerouslySetInnerHTML={{ __html: post.excerpt }} />
-          <Link className="read-more" to={`/${post.frontmatter.slug}`}>
+          <Link className="read-more" to={post.fields.path}>
             read more
           </Link>
         </div>
