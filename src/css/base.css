@@ -1,96 +1,92 @@
-@import url(https://fonts.googleapis.com/css?family=Carter+One);
-/* Layout */
 #wrap {
   max-width: 960px;
-  margin: 10px auto 20px;
-  font-size: 16px;
+  margin: 0 auto 0px;
+  padding: 10px 0 20px 0;
 }
 
-/* Header */
-#wrap > header {
-  border-bottom: 1px solid #0000a6;
-  padding: 10px;
-  position: relative;
-  height: 25px;
-}
-
-#wrap > header h1 {
-  display: inline-block;
-  margin: 0px;
-  position: absolute;
-  bottom: -22px;
-  right: 10px;
-  font-size: 3em;
-  font-family: "Carter One", sans-serif;
-}
-
-#wrap > header h1 a {
+:any-link {
+  color: #3030bf;
   text-decoration: none;
+}
+
+:any-link:hover {
+  text-decoration: underline;
+}
+
+.site-header {
+  display: flex;
+  flex-direction: row-reverse;
+  align-content: flex-start;
+  border-bottom: 1px solid #3030bf;
+  margin-bottom: 30px;
+  align-items: last baseline;
+}
+
+.site-header h1 {
+  text-align: right;
+  flex: 1 1 100%;
+  margin: 0 15px -4px 0;
+  font-style: italic;
+  font-size: 50px;
+  transform: translate(0, 4px);
+}
+
+.site-header h1 a {
   color: #0000a6;
 }
 
-#wrap > header h1 a:hover {
-  text-decoration: none;
+.site-header nav {
+  flex: 1 1 100%;
 }
 
-#wrap > header nav {
-  display: inline-block;
-  position: absolute;
-  left: 0px;
-  bottom: 0px;
-  font-family: "Carter One", sans-serif;
-}
-
-#wrap > header nav a {
-  text-decoration: none;
-  font-size: 1.2em;
-  padding: 0 10px;
-  margin-right: 5px;
-  color: #0000a6;
-}
-
-#wrap > header nav a:hover {
-  text-decoration: none;
-}
-
-#wrap > header nav a.active {
-  border-top: 1px solid #0000a6;
+.site-header nav h2 {
+  margin: 0;
 }
 
 #content {
-  color: #4e3434;
-  font-family: serif;
-  line-height: 1.5;
   padding: 10px;
-  position: relative;
 }
 
-#content header {
+.post {
+  margin-bottom: 64px;
+}
+
+.post header {
   margin-bottom: 20px;
+  display: flex;
+  flex-direction: column-reverse;
 }
 
-header > h1,
-header > h2 {
+.post header h1 {
   margin-bottom: 0;
 }
 
-#content header .subheader {
-  margin-top: -10px;
+.post .subheader {
   font-size: 0.8em;
+  opacity: 0.8;
 }
 
-header .subheader > :not(:last-child)::after {
+.post .subheader > :not(:last-child)::after {
   content: " ";
   border-left: 1px solid #322;
   display: inline-block;
-  height: 1.4em;
+  height: 1.5em;
   margin: 0 0.6em;
   position: relative;
-  top: 0.2em;
+  top: 0.3em;
+}
+
+.post p:last-child {
+  margin-bottom: 0.6em;
+}
+
+.read-more {
+  font-style: italic;
 }
 
 .tags {
   display: inline;
+  margin: 0;
   padding: 0;
 }
 
@@ -102,8 +98,7 @@ header .subheader > :not(:last-child)::after {
   content: ", ";
 }
 
-#content aside {
-  font-size: 0.9em;
+.post aside {
   float: right;
   width: 30%;
   margin: 10px 10px 10px 5px;
@@ -111,83 +106,44 @@ header .subheader > :not(:last-child)::after {
   text-align: left;
 }
 
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  font-family: sans-serif;
-  font-weight: 100;
-  color: #322;
-  margin: 5px 0 10px;
-}
-
-a {
-  color: #3030bf;
-  font-weight: bold;
-  text-decoration: none;
-}
-
-a:hover {
-  color: #4030ef;
-  text-decoration: underline;
-}
-
-p {
-  margin: 0 0 20px 0;
-}
-
-p:last-child {
-  margin-bottom: 5px;
-}
-
-pre {
-  padding: 5px 0 5px 10px;
-  border-left: 3px solid #ddd;
-  font-family: Monospace;
-  font-size: 0.9em;
-  color: #555;
-  background-color: #f0f0f0;
-}
-
+.post pre,
 .codepath {
-  border-left: 3px solid rgb(221, 221, 221);
-  color: rgb(85, 85, 85);
-  font-family: mono;
-  font-weight: bold;
-  display: block;
-  border-bottom: 0px solid rgb(221, 221, 221);
-  background: none repeat scroll 0% 0% rgb(240, 240, 240);
-  margin-bottom: -20px;
-  padding: 5px 0 5px 10px;
+  border-left: 3px solid #ddd;
+  background-color: #f0f0f0;
+  color: #555;
+  padding: 5px 10px;
+  line-height: 1.2em;
+  font-family: monospace;
 }
 
-code {
-  background-color: #f0f0f0;
-  padding: 1px 2px;
+.post pre {
+  line-height: 0.5em;
+}
+
+.post p .codepath {
+  display: block;
+  margin-bottom: -1.82rem;
   font-weight: bold;
-  font-size: 0.9em;
+  padding: 10px 10px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+.post p .codepath::before {
+  content: "$ cat ";
+}
+
+.post pre code {
+  line-height: 1.5rem;
 }
 
 #wrap > footer {
   margin-top: 50px;
-  border-top: 2px solid #0000a6;
+  border-top: 1px solid #3030bf;
   padding: 10px;
-  font-size: 0.7em;
   color: #999;
 }
 
 #wrap > footer p {
   margin: 0 10px 0 0;
   display: inline;
-}
-
-.post {
-  margin-bottom: 64px;
-}
-
-.read-more {
-  font-weight: normal;
-  font-style: italic;
 }

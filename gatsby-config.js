@@ -1,6 +1,6 @@
 module.exports = {
   siteMetadata: {
-    title: "mythmon.com",
+    title: "mythmon",
     description: "mythmon's personal website and block",
     author: "@mythmon",
   },
@@ -38,6 +38,13 @@ module.exports = {
     },
     "gatsby-transformer-sharp",
     "gatsby-plugin-sharp",
+
+    {
+      resolve: "gatsby-plugin-typography",
+      options: {
+        pathToConfigModule: "src/utils/typography",
+      },
+    },
 
     // {
     //   resolve: "gatsby-plugin-manifest",

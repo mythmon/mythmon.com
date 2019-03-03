@@ -9,13 +9,15 @@ import PostHeader from "../components/PostHeader";
 export default function Template({ data }) {
   const { markdownRemark: post } = data;
   return (
-    <div className="post">
+    <>
       <Helmet title={`${post.frontmatter.title} ~ mythmon`} />
-      <Layout>
-        <PostHeader post={post} />
-        <div className="post-content" dangerouslySetInnerHTML={{ __html: post.html }} />
+      <Layout className="post-page">
+        <div className="post">
+          <PostHeader post={post} />
+          <div dangerouslySetInnerHTML={{ __html: post.html }} />
+        </div>
       </Layout>
-    </div>
+    </>
   );
 }
 

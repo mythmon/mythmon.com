@@ -8,7 +8,7 @@ import PostHeader from "../components/PostHeader";
 export default function IndexPage({ data }) {
   const posts = data.allMarkdownRemark.edges.map(e => e.node);
   return (
-    <Layout>
+    <Layout className="index-page">
       <Helmet title={"Posts ~ mythmon"} />
 
       {posts.map(post => (
