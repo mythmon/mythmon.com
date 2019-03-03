@@ -7,5 +7,9 @@
       "use": "@now/static-build",
       "config": { "distDir": "public" }
     }
+  ],
+  "alias": [
+    "mythmon.com",
+    "www.mythmon.com"
   ]
 }
