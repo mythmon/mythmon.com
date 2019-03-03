@@ -19,6 +19,13 @@ export default function Footer({ siteTitle }) {
           timeZoneName: "short",
         })}
       </p>
+      <iframe
+        style={{ width: 800, height: 60 }}
+        title="webring-nav"
+        src="https://abelian.now.sh/embed/"
+        frameBorder="no"
+        scrolling="no"
+      />
     </footer>
   );
 }
