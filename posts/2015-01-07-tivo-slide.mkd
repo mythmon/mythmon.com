@@ -117,48 +117,49 @@ should be a `userdata/keymaps/` directory. Put this file there:
 
 <span class="codepath">.xbmc/userdata/keymaps/tivo.xml</span>
 
-    :::xml
-    <!-- Tivo Slide -->
-    <keymap>
-      <global>
-        <keyboard>
-          <button id="f200">ActivateWindow(home)</button> <!-- Tivo key -->
-          <f1>Select</f1> <!-- Select key -->
-          <f2></f2> <!-- A / Yellow -->
-          <f3></f3> <!-- B / Blue -->
-          <f4>ContextMenu</f4> <!-- C / Red -->
-          <f5></f5> <!-- D / Green -->
-          <f6>AspectRatio</f6> <!-- Zoom key -->
-          <f8>Select</f8> <!-- Lower enter key -->
-          <f9>FullScreen</f9> <!-- Guide Key -->
-          <f10>PageUp</f10> <!-- channel up key -->
-          <f11>PageDown</f11> <!-- channel down key -->
-          <f12>Info</f12> <!-- Guide key -->
-          <prev_track>Back</prev_track> <!-- "instant replay" key -->
-          <home></home> <!-- Live TV key -->
-          <delete>System.LogOff</delete> <!-- Clear key -->
-        </keyboard>
-      </global>
+```xml
+<!-- Tivo Slide -->
+<keymap>
+  <global>
+    <keyboard>
+      <button id="f200">ActivateWindow(home)</button> <!-- Tivo key -->
+      <f1>Select</f1> <!-- Select key -->
+      <f2></f2> <!-- A / Yellow -->
+      <f3></f3> <!-- B / Blue -->
+      <f4>ContextMenu</f4> <!-- C / Red -->
+      <f5></f5> <!-- D / Green -->
+      <f6>AspectRatio</f6> <!-- Zoom key -->
+      <f8>Select</f8> <!-- Lower enter key -->
+      <f9>FullScreen</f9> <!-- Guide Key -->
+      <f10>PageUp</f10> <!-- channel up key -->
+      <f11>PageDown</f11> <!-- channel down key -->
+      <f12>Info</f12> <!-- Guide key -->
+      <prev_track>Back</prev_track> <!-- "instant replay" key -->
+      <home></home> <!-- Live TV key -->
+      <delete>System.LogOff</delete> <!-- Clear key -->
+    </keyboard>
+  </global>
 
-      <FullscreenVideo>
-        <keyboard>
-          <prev_track>SmallStepBack</prev_track> <!-- "instant replay" key -->
-          <next_track>StepForward</next_track> <!-- -> key -->
-          <return>OSD</return>
-          <enter>OSD</enter>
-          <f2>ActivateWindow(osdaudiosettings)</f2> <!-- A (Yellow) -->
-          <f3>ActivateWindow(videobookmarks)</f3> <!-- B (Blue) -->
-          <f4>ActivateWindow(SubtitleSearch)</f4> <!-- C (Red) -->
-          <f5>ActivateWindow(osdvideosettings)</f5> <!-- D (Green) -->
-        </keyboard>
-      </FullscreenVideo>
+  <FullscreenVideo>
+    <keyboard>
+      <prev_track>SmallStepBack</prev_track> <!-- "instant replay" key -->
+      <next_track>StepForward</next_track> <!-- -> key -->
+      <return>OSD</return>
+      <enter>OSD</enter>
+      <f2>ActivateWindow(osdaudiosettings)</f2> <!-- A (Yellow) -->
+      <f3>ActivateWindow(videobookmarks)</f3> <!-- B (Blue) -->
+      <f4>ActivateWindow(SubtitleSearch)</f4> <!-- C (Red) -->
+      <f5>ActivateWindow(osdvideosettings)</f5> <!-- D (Green) -->
+    </keyboard>
+  </FullscreenVideo>
 
-      <MyVideoLibrary>
-        <keyboard>
-          <f5>ToggleWatched</f5> <!-- D / Green -->
-        </keyboard>
-      </MyVideoLibrary>
-    </keymap>
+  <MyVideoLibrary>
+    <keyboard>
+      <f5>ToggleWatched</f5> <!-- D / Green -->
+    </keyboard>
+  </MyVideoLibrary>
+</keymap>
+```
 
 This is what I use at home, but I'm still tweaking it. Feel free to customize
 it however you like. You won't break anything.

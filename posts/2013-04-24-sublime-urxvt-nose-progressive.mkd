@@ -15,17 +15,18 @@ error. This works well for some workflows, but not mine.
 
 Here is an example of nose-progressive's output:
 
-    ::text
-    Reusing old database "test_kitsune". Set env var FORCE_DB=1 if you need fresh DBs.
-    Generating sample data from wiki...
-    Done!
+```text
+Reusing old database "test_kitsune". Set env var FORCE_DB=1 if you need fresh DBs.
+Generating sample data from wiki...
+Done!
 
-    FAIL: kitsune.apps.wiki.tests.test_models:DocumentTests.test_document_is_template
-      vim +44 apps/wiki/tests/test_models.py  # test_document_is_template
-        assert 0
-    AssertionError
+FAIL: kitsune.apps.wiki.tests.test_models:DocumentTests.test_document_is_template
+    vim +44 apps/wiki/tests/test_models.py  # test_document_is_template
+    assert 0
+AssertionError
 
-    1438 tests, 1 failure, 0 errors, 5 skips in 115.0s
+1438 tests, 1 failure, 0 errors, 5 skips in 115.0s
+```
 
 In particular, note the line that begins `vim +44 apps/wiki...`. It is
 indicating the file and line number where the error occurred, and if I
@@ -52,20 +53,22 @@ Sublime should be used to open the file, not vim. A quick trip to the
 documentation taught me that I can set the environment variable
 `$NOSE_PROGRESSIVE_EDITOR_SHORTCUT_TEMPLATE` to a template string to
 
-    ::python
-    {dim_format}subl://{path}:{line_number}{normal}{function_format}{hash_if_function}{function}{normal}
+```python
+{dim_format}subl://{path}:{line_number}{normal}{function_format}{hash_if_function}{function}{normal}
+```
 
 Quite a mouthful, but it gets the job done. This format string will print something visually resembling the old line, but with a custom format. In action, it looks like this:
 
-    ::text
-    Reusing old database "test_kitsune". Set env var FORCE_DB=1 if you need fresh DBs.
+```text
+Reusing old database "test_kitsune". Set env var FORCE_DB=1 if you need fresh DBs.
 
-    FAIL: kitsune.apps.wiki.tests.test_models:DocumentTests.test_document_is_template
-      subl:///home/mythmon/src/kitsune/apps/wiki/tests/test_models.py:44  # test_document_is_template
-        assert 0
-    AssertionError
+FAIL: kitsune.apps.wiki.tests.test_models:DocumentTests.test_document_is_template
+    subl:///home/mythmon/src/kitsune/apps/wiki/tests/test_models.py:44  # test_document_is_template
+    assert 0
+AssertionError
 
-    1 test, 1 failure, 0 errors in 0.0s
+1 test, 1 failure, 0 errors in 0.0s
+```
 
 Awesome! Now to get the terminal to respond.
 
@@ -76,12 +79,13 @@ to my terminal. I tweaked it's config to look like this to make it
 recognize my custom Sublime links from above, as well as normal web
 links. This is the relevant snippet of my `~/.Xdefaults` file:
 
-    ::Xdefaults
-    URxvt.perl-ext-common: default,url-select
-    URxvt.url-select.launcher: urxvt_launcher
-    URxvt.url-select.underline: true
-    URxvt.url-select.button: 3
-    URxvt.matcher.pattern.1: \\b(subl://[^ ]+)\\b
+```Xdefaults
+URxvt.perl-ext-common: default,url-select
+URxvt.url-select.launcher: urxvt_launcher
+URxvt.url-select.underline: true
+URxvt.url-select.button: 3
+URxvt.matcher.pattern.1: \\b(subl://[^ ]+)\\b
+```
 
 Line by line:
 

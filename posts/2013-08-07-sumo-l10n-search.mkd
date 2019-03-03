@@ -73,11 +73,9 @@ change the document that gets inserted into the ES index, so we will
 have to take that into account later. If we insert a document contains
 "the dog jumped" into the index, it would get indexed as something like
 
-    ::json
-    [
-        {"token": "dog", "start": 4, "end": 7},
-        {"token": "jump", "start": 8, "end": 14}
-    ]
+```json
+[{ "token": "dog", "start": 4, "end": 7 }, { "token": "jump", "start": 8, "end": 14 }]
+```
 
 This isn't really what ES would return, but it is close enough. Note how
 the tokens inserted are post-analysis version, that include the changes
@@ -91,11 +89,12 @@ consists of a few parts.
 SUMO is a Django app, so in settings.py, we define a map of languages to
 ES analyzers, like this (except with a lot more languages):
 
-    ::python
-    ES_LOCALE_ANALYZERS = {
-        'en-US': 'snowball',
-        'es': 'snowball-spanish',
-    }
+```python
+ES_LOCALE_ANALYZERS = {
+    'en-US': 'snowball',
+    'es': 'snowball-spanish',
+}
+```
 
 Note: `snowball-spanish` is simply the normal Snowball analyzer with an
 option of `{"language": "Spanish"}`.
@@ -105,20 +104,21 @@ locale, with a fallback. This also takes into account the possibility
 that some ES analyzers are located in plugins which may not be
 available.
 
-    ::python
-    def es_analyzer_for_locale(locale, fallback="standard"):
-      """Pick an appropriate analyzer for a given locale.
+```python
+def es_analyzer_for_locale(locale, fallback="standard"):
+    """Pick an appropriate analyzer for a given locale.
 
-      If no analyzer is defined for `locale`, return fallback instead,
-      which defaults to ES analyzer named "standard".
-      """
-      analyzer = settings.ES_LOCALE_ANALYZERS.get(locale, fallback)
+    If no analyzer is defined for `locale`, return fallback instead,
+    which defaults to ES analyzer named "standard".
+    """
+    analyzer = settings.ES_LOCALE_ANALYZERS.get(locale, fallback)
 
-      if (not settings.ES_USE_PLUGINS and
-              analyzer in settings.ES_PLUGIN_ANALYZERS):
-          analyzer = fallback
+    if (not settings.ES_USE_PLUGINS and
+            analyzer in settings.ES_PLUGIN_ANALYZERS):
+        analyzer = fallback
 
-      return analyzer
+    return analyzer
+```
 
 ### Indexing
 
@@ -132,14 +132,15 @@ setting the `_analyzer` field when indexing it into ES. This ends up
 looking something like this (this isn't the real code, because the real
 code is much longer for uninteresting reasons):
 
-    ::python
-    def extract_document(obj):
-        return {
-            'document_title': obj.title,
-            'document_content': obj.content,
-            'locale': obj.locale,
-            '_analyzer': es_analyzer_for_locale(obj.locale),
-        }
+```python
+def extract_document(obj):
+    return {
+        'document_title': obj.title,
+        'document_content': obj.content,
+        'locale': obj.locale,
+        '_analyzer': es_analyzer_for_locale(obj.locale),
+    }
+```
 
 ## Searching
 
@@ -150,22 +151,21 @@ to delete cookies", here is what happens:
 
 First, the document would have been indexed and analyzed, producing this:
 
-    ::json
-    [
-        {"token": "delet", "start": 0, "end": 8},
-        {"token": "cooki", "start": 9, "end": 16}
-    ]
+```json
+[{ "token": "delet", "start": 0, "end": 8 }, { "token": "cooki", "start": 9, "end": 16 }]
+```
 
 So now, if we try and query "how to delete cookies", nothing will match!
 That is because we need to analyze the search query as well (ES does
 this by default). analyzing the search query results in:
 
-    ::json
-    [
-        {"token": "how", "start": 0, "end": 3},
-        {"token": "delet", "start": 7, "end": 13},
-        {"token": "cooki", "start": 14, "end": 21}
-    ]
+```json
+[
+  { "token": "how", "start": 0, "end": 3 },
+  { "token": "delet", "start": 7, "end": 13 },
+  { "token": "cooki", "start": 14, "end": 21 }
+]
+```
 
 Excellent! This will match the document's title pretty well. Remember
 the ElasticSearch doesn't enforce that 100% of the query matches. It
@@ -176,21 +176,20 @@ There is an issue though. Let's try this example in Spanish. Here is the
 document title "Borrando Cookies", as analyzed by our analysis process
 from above.
 
-    ::json
-    [
-        {"token": "borr", "start": 0, "end": 8},
-        {"token": "cooki", "start": 9, "end": 16}
-    ]
+```json
+[{ "token": "borr", "start": 0, "end": 8 }, { "token": "cooki", "start": 9, "end": 16 }]
+```
 
 and the search "como borrar las cookies":
 
-    ::json
-    [
-        {"token": "como", "start": 0, "end": 4},
-        {"token": "borrar", "start": 6, "end": 11},
-        {"token": "las", "start": 12, "end": 15},
-        {"token": "cooki", "start": 16 "end": 23}
-    ]
+```json
+[
+    {"token": "como", "start": 0, "end": 4},
+    {"token": "borrar", "start": 6, "end": 11},
+    {"token": "las", "start": 12, "end": 15},
+    {"token": "cooki", "start": 16 "end": 23}
+]
+```
 
 ... Not so good. In particular, 'borrar', which is another verb form of
 'Borrando' in the title, got analyzed as English, and so didn't get
@@ -205,30 +204,32 @@ interface, we assume that the search is written in Spanish.
 The original query that we use to do searches looks something like this
 much abbreviated sample:
 
-    ::json
-    {
-        "query": {
-            "text": {
-                "document_title": {
-                    "query": "como borrar las cookies"
-                }
-            }
-        }
+```json
+{
+  "query": {
+    "text": {
+      "document_title": {
+        "query": "como borrar las cookies"
+      }
     }
+  }
+}
+```
 
 The new query includes an analyzer field on the text match:
 
-    ::json
-    {
-        "query": {
-            "text": {
-                "document_title": {
-                    "query": "como borrar las cookies",
-                    "analyzer": "snowball-spanish"
-                }
-            }
-        }
+```json
+{
+  "query": {
+    "text": {
+      "document_title": {
+        "query": "como borrar las cookies",
+        "analyzer": "snowball-spanish"
+      }
     }
+  }
+}
+```
 
 This will result in the correct analyzer being used at search time.
 

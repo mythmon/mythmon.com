@@ -43,12 +43,13 @@ So the solution is to always check `git fsck` after cloning if you really must k
 
 Someone pointed that the various remote protocols git used would probably be a little pickier about what it got, in case of network transmission errors. Luckily, this was true. I tested http, git, and ssh protocols, and each of them raised an error on clone:
 
-    ::text
-    Cloning into './c'...
-    error: File 12799ccbe7ce445b11b7bd4833bcc2c2ce1b48b7 has bad hash
-    fatal: missing blob object '12799ccbe7ce445b11b7bd4833bcc2c2ce1b48b7'
-    fatal: remote did not send all necessary objects
-    Unexpected end of command stream
+```text
+Cloning into './c'...
+error: File 12799ccbe7ce445b11b7bd4833bcc2c2ce1b48b7 has bad hash
+fatal: missing blob object '12799ccbe7ce445b11b7bd4833bcc2c2ce1b48b7'
+fatal: remote did not send all necessary objects
+Unexpected end of command stream
+```
 
 The particular output varied a little with each protocol, but the result was the same. An error in the output, return code 128, and no repository cloned. This is good.
 

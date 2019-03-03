@@ -23,8 +23,9 @@ does a pretty good at replicating GitHub's network view.
 
 [neturl]: https://github.com/mythmon/corsica/network
 
-    ::bash
-    $ git log --graph --all --decorate
+```bash
+$ git log --graph --all --decorate
+```
 
 <aside class="thumb">
     <img src="images/gitnet.png">
@@ -54,8 +55,9 @@ In practice, I only have this done for my main day-job project, so the update
 script is specific to that project. It could be expanded to all my git repos,
 but I haven't done that. To pull this off, I have this line in my crontab:
 
-    ::cron
-    */10 * * * * python2 /home/mythmon/src/kitsune/scripts/update-git.py
+```cron
+*/10 * * * * python2 /home/mythmon/src/kitsune/scripts/update-git.py
+```
 
 I'll get to the details of this script in the next section, but the important
 part is that it runs `git fetch --all` for the repo on question. To run this
@@ -124,45 +126,46 @@ the various server environments using `git update-rev`. This is run on a cron
 every few minutes, and makes knowing what is going on a little easier, and git
 in a distributed team a little nicer.
 
-    ::python
-    #!/usr/bin/env python
+```python
+#!/usr/bin/env python
 
-    import os
-    import re
-    import subprocess
+import os
+import re
+import subprocess
 
-    import requests
-
-
-    repo_dir = "{HOME}/src/kitsune".format(**os.environ)
-    environments = {
-        'dev': 'http://support-dev.allizom.org/media/revision.txt',
-        'stage': 'http://support.allizom.org/media/revision.txt',
-        'prod': 'http://support.mozilla.org/media/revision.txt',
-    }
+import requests
 
 
-    def main():
-        cdpath = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..')
-        os.chdir(cdpath)
-
-        git = Git()
-
-        print(git.fetch(all=True))
-        for env_name, revision_url in environments.items():
-            try:
-                cur_rev = git.rev_parse('deployed/' + env_name).strip()
-            except subprocess.CalledProcessError:
-                cur_rev = None
-            new_rev = requests.get(revision_url).text.strip()
-
-            if cur_rev != new_rev:
-                print 'updating ' + env_name, cur_rev[:8], new_rev[:8]
-                git.update_ref('refs/heads/deployed/' + env_name, new_rev)
+repo_dir = "{HOME}/src/kitsune".format(**os.environ)
+environments = {
+    'dev': 'http://support-dev.allizom.org/media/revision.txt',
+    'stage': 'http://support.allizom.org/media/revision.txt',
+    'prod': 'http://support.mozilla.org/media/revision.txt',
+}
 
 
-    if __name__ == '__main__':
-        main()
+def main():
+    cdpath = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..')
+    os.chdir(cdpath)
+
+    git = Git()
+
+    print(git.fetch(all=True))
+    for env_name, revision_url in environments.items():
+        try:
+            cur_rev = git.rev_parse('deployed/' + env_name).strip()
+        except subprocess.CalledProcessError:
+            cur_rev = None
+        new_rev = requests.get(revision_url).text.strip()
+
+        if cur_rev != new_rev:
+            print 'updating ' + env_name, cur_rev[:8], new_rev[:8]
+            git.update_ref('refs/heads/deployed/' + env_name, new_rev)
+
+
+if __name__ == '__main__':
+    main()
+```
 
 [a gist of it]: https://gist.github.com/mythmon/7536335
 
