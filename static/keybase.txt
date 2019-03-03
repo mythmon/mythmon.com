@@ -1,0 +1,82 @@
+==================================================================
+https://keybase.io/mythmon
+--------------------------------------------------------------------
+
+I hereby claim:
+
+  * I am an admin of http://mythmon.com
+  * I am mythmon (https://keybase.io/mythmon) on keybase.
+  * I have a public key with fingerprint DAFE 0A2F 0B02 90B5 7AC3  5186 CD8D 37A4 6031 DC1C
+
+To claim this, I am signing this object:
+
+{
+    "body": {
+        "client": {
+            "name": "keybase.io node.js client",
+            "version": "0.5.1"
+        },
+        "key": {
+            "fingerprint": "dafe0a2f0b0290b57ac35186cd8d37a46031dc1c",
+            "host": "keybase.io",
+            "key_id": "CD8D37A46031DC1C",
+            "uid": "a51c6428ed197315fc0344e24da64d00",
+            "username": "mythmon"
+        },
+        "merkle_root": {
+            "ctime": 1411582675,
+            "hash": "f070c677841537619e6ae209a47703f9eb0da15c6166a95ff84fd4d18a32bec7289a48f7459fc7c1565d35eecba9c84f3cc5b84c3c05fd4889c3ec114c2f6e89",
+            "seqno": 60340
+        },
+        "service": {
+            "hostname": "mythmon.com",
+            "protocol": "http:"
+        },
+        "type": "web_service_binding",
+        "version": 1
+    },
+    "ctime": 1411582694,
+    "expire_in": 157680000,
+    "prev": "a0dfcfcbaeeeff911adaeb8109ee7ec0f2f7ce53a8a91bc00e3ad12605efe8b6",
+    "seqno": 10,
+    "tag": "signature"
+}
+
+with the aforementioned key, yielding the PGP signature:
+
+-----BEGIN PGP MESSAGE-----
+Version: GnuPG v2
+
+owFdkm1QVFUYxxdC4iVBDUsFFFYGcQe2c+773aEgWaU3Co2RXrTl3nPPhbvC3mV3
+AVdliMQxnSEC+0AYL2OQGiITaUFQwVAIg0pIMxij0iiITRSNqRmD1L2MTdn5dM55
+fs//ef7nOe8ufsjg63OunG3MgpcifAZ/Eg0Za4Ou7zaKquQ1WnYbUa6CHR595xDy
+sNFi3IG9ouDGZkWNcqgSNtvdUfeZeGMhdrkV1aFRwEybobE4Xsf1ZFlxZGOX06Xo
+WkZJkDEQCBmIgOCBSLMCImnIMUjiJJIVKAaQUEIQaZI5qtvzQFXjgqZNkbTbFCtn
+JdmnF3hrCkzRYgULAYGGiKEIDkuQZ0lIywiQFIUJShIYSgJAB93Ydd9SnteTk6e1
+rbWbh107crHNpaoLnpFH0QlIQUhzBMPSWkOCO0fLkQELEMOyHAVpkmUgjxkBE4AX
+KJYFpMxjEUgCpBEDGUbgaVnmKFmiJMgJJCFixBKchnIyS9G8jFgEaYaWSBpjJAo8
+0lgSIVrkKEQiQGuJHMcjEiMIKUTIDOZ4zYEb5ztUo0UzT4Fi/egqVBDW29Yf7UFv
+ZqTmaSlOl+pRkZqrBXI8HqdFt+zxOnWwCIs2TaJZ17CJikPSJvbfkUIN/d9z8FS8
+Ee90Ki5sU3SCZhkOaEuvgwv1MQBJRrJmCWMsyzyEgiRgkYOAx5jFCMiEzCJMkwIn
+8FBEAGBSkCDBABrLmBOZf01CTdQjZGuabiXbIXgKXNhYfMA3ws/g42vwX+Srf1pD
+UOCSf37y5c9D7y2z1HdFWJst6muqg2iq6j8c8uauTdc/6qzOLZ5e1Pb6aEtlynhZ
+Q139z4GhxWdWLh4Oji23tqTtHwSJN2pW5q7amvCjbUNMxy7TndbSgZa+J/+0B1z4
+racqbSy9Kco/DDbEbSupgGeLNh3aS/aN8CC98toLrrCe94iaNYX9fvfmXXVjV/eW
+OsuW//Ly3d3ZbeP71l2biforyx5eOzQ8Hqi2RjdYCsY6/BxVGSWnfFPdcTX92wfX
+r0gK/S7kxSu47qjiuzk2KrOre7z38Pwbx22fzB0c/GbPE4nPmSKn8ucb2cYINWOw
+PfGxpgbuqZ74V7ctP5t/1WJvr+4OeeeCdHDlRGlVeEhC3+nSVbefj13jrF93JLkj
+6cuiGFP7vluZ5uhfn33GNE3PJrw9rcY/PtT6/lv1F6sfrUj9cHtaQOGsxT5wvXzR
+MZ/oyJmXeu8uKZ+c6CdaTq8KNy+bDB42+G35av3YCcfGG97a/fR42dKT4pnp8xEP
+H9m459bvjWEHOjN6p0/FJKp3Bj7o7I66EbZUMK2IrD40v/VyQfBcsG1tf2rm1Mgj
+q3+ofGUk94/emxXHnMel0a9rrZQ98Xtv+onqokD/+RCGEUfLv5jw7lxtvpqfkOVj
+nzQE9wVsnjlZMfexqfy8aSqZS646dztlSwuOCOoRr8SVXExO+kyc+fbTsLpLs5eP
+tt3s6h3qb/4b
+=/lDc
+-----END PGP MESSAGE-----
+
+And finally, I am proving ownership of this host by posting or
+appending to this document.
+
+View my publicly-auditable identity here: https://keybase.io/mythmon
+
+==================================================================
