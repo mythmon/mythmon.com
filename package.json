@@ -16,7 +16,7 @@
     "gatsby-remark-autolink-headers": "^4.1.0",
     "gatsby-remark-images": "^5.1.0",
     "gatsby-source-filesystem": "^3.4.0",
-    "gatsby-transformer-remark": "^4.1.0",
+    "gatsby-transformer-remark": "^5.25.1",
     "gatsby-transformer-sharp": "^3.4.0",
     "moment": "^2.24.0",
     "prop-types": "^15.7.2",
